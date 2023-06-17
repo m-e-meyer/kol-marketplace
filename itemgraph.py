@@ -1,19 +1,25 @@
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+#
+
 import re
+import os
 import logging
 import math
 from urllib import request
 import traceback
 import signal
 import ssl
-import boto3
-from boto3.dynamodb.conditions import Key, Attr
+# No longer a need for database, since we can only go back 2 years now
+#import boto3
+#from boto3.dynamodb.conditions import Key, Attr
 from datetime import datetime, timedelta, timezone
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-WIKILOC = "80.94.68.82"
-#WIKILOC = "kol.coldfront.net"
+#WIKILOC = "80.94.68.82"
+WIKILOC = "kol.coldfront.net"
 SOURCE = f'https://{WIKILOC}/newmarket/itemgraph.php'
 SOURCE_IMG = f'http://{WIKILOC}/newmarket/newmarket/'
 ECON_URL = "https://www.kingdomofloathing.com/econ/result.php"
@@ -35,166 +41,166 @@ TIMESHIFT = timedelta(hours=-8)
 STYLE = R"""<style type="text/css">
 body
 {
-    background-color:#fff;
-    color:#000;
-    font-family:verdana, arial, sans-serif;
-    font-size:10px;
-    margin:15px;
+	background-color:#fff;
+	color:#000;
+	font-family:verdana, arial, sans-serif;
+	font-size:10px;
+	margin:15px;
 }
 
 a
 {
-    color:#000;
-    font-weight:bold;
-    text-decoration:underline;
+	color:#000;
+	font-weight:bold;
+	text-decoration:underline;
 }
 
 td
 {
-    font-size:11px;
-    padding:4px;
+	font-size:11px;
+	padding:4px;
 }
 
 .topbar
 {
-    background-color:#930;
-    color:#fff;
-    font-weight:bold;
+	background-color:#930;
+	color:#fff;
+	font-weight:bold;
 }
 
 .topbar a
 {
-    color:#fff;
-    text-decoration:none;
+	color:#fff;
+	text-decoration:none;
 }
 
 .topbar a:hover
 {
-    text-decoration:underline;
+	text-decoration:underline;
 }
 
 .options
 {
-    color:#930;
-    font-size:10px;
-    font-weight:bold;
+	color:#930;
+	font-size:10px;
+	font-weight:bold;
 }
 
 .row1
 {
-    background-color:#eee;
+	background-color:#eee;
 }
 
 .row2
 {
-    background-color:#fdc;
+	background-color:#fdc;
 }
 
 select
 {
-    font-size:9px;
+	font-size:9px;
 }
 
 input
 {
-    font-size:9px;
+	font-size:9px;
 }
 
 
 /* calendar icon */
 img.tcalIcon {
-    cursor: pointer;
-    margin-left: 1px;
-    vertical-align: middle;
+	cursor: pointer;
+	margin-left: 1px;
+	vertical-align: middle;
 }
 /* calendar container element */
 div#tcal {
-    position: absolute;
-    visibility: hidden;
-    z-index: 100;
-    width: 158px;
-    padding: 2px 0 0 0;
+	position: absolute;
+	visibility: hidden;
+	z-index: 100;
+	width: 158px;
+	padding: 2px 0 0 0;
 }
 /* all tables in calendar */
 div#tcal table {
-    width: 100%;
-    border: 1px solid silver;
-    border-collapse: collapse;
-    background-color: white;
+	width: 100%;
+	border: 1px solid silver;
+	border-collapse: collapse;
+	background-color: white;
 }
 /* navigation table */
 div#tcal table.ctrl {
-    border-bottom: 0;
+	border-bottom: 0;
 }
 /* navigation buttons */
 div#tcal table.ctrl td {
-    width: 15px;
-    height: 20px;
+	width: 15px;
+	height: 20px;
 }
 /* month year header */
 div#tcal table.ctrl th {
-    background-color: white;
-    color: black;
-    border: 0;
+	background-color: white;
+	color: black;
+	border: 0;
 }
 /* week days header */
 div#tcal th {
-    border: 1px solid silver;
-    border-collapse: collapse;
-    text-align: center;
-    padding: 3px 0;
-    font-family: tahoma, verdana, arial;
-    font-size: 10px;
-    background-color: gray;
-    color: white;
+	border: 1px solid silver;
+	border-collapse: collapse;
+	text-align: center;
+	padding: 3px 0;
+	font-family: tahoma, verdana, arial;
+	font-size: 10px;
+	background-color: gray;
+	color: white;
 }
 /* date cells */
 div#tcal td {
-    border: 0;
-    border-collapse: collapse;
-    text-align: center;
-    padding: 2px 0;
-    font-family: tahoma, verdana, arial;
-    font-size: 11px;
-    width: 22px;
-    cursor: pointer;
+	border: 0;
+	border-collapse: collapse;
+	text-align: center;
+	padding: 2px 0;
+	font-family: tahoma, verdana, arial;
+	font-size: 11px;
+	width: 22px;
+	cursor: pointer;
 }
 /* date highlight
    in case of conflicting settings order here determines the priority from least to most important */
 div#tcal td.othermonth {
-    color: silver;
+	color: silver;
 }
 div#tcal td.weekend {
-    background-color: #ACD6F5;
+	background-color: #ACD6F5;
 }
 div#tcal td.today {
-    border: 1px solid red;
+	border: 1px solid red;
 }
 div#tcal td.selected {
-    background-color: #FFB3BE;
+	background-color: #FFB3BE;
 }
 /* iframe element used to suppress windowed controls in IE5/6 */
 iframe#tcalIF {
-    position: absolute;
-    visibility: hidden;
-    z-index: 98;
-    border: 0;
+	position: absolute;
+	visibility: hidden;
+	z-index: 98;
+	border: 0;
 }
 /* transparent shadow */
 div#tcalShade {
-    position: absolute;
-    visibility: hidden;
-    z-index: 99;
+	position: absolute;
+	visibility: hidden;
+	z-index: 99;
 }
 div#tcalShade table {
-    border: 0;
-    border-collapse: collapse;
-    width: 100%;
+	border: 0;
+	border-collapse: collapse;
+	width: 100%;
 }
 div#tcalShade table td {
-    border: 0;
-    border-collapse: collapse;
-    padding: 0;
+	border: 0;
+	border-collapse: collapse;
+	padding: 0;
 }
 </style>"""
 
@@ -205,29 +211,29 @@ OLD_DATEPICKER = f'<script language="JavaScript" src="http://{WIKILOC}/newmarket
 DATESTYLE = Rf'''
 <style>
 .datepicker_vista {{
-    position: absolute;
-    font-size: 10px;
-    font-family: Tahoma, sans-serif;
-    color: #000;
-    line-height: normal;
-    width: 172px;
-    height: 135px;
-    padding: 14px;
-    background: url(https://{WIKILOC}/newmarket/frame.png) no-repeat;
+	position: absolute;
+	font-size: 10px;
+	font-family: Tahoma, sans-serif;
+	color: #000;
+	line-height: normal;
+	width: 172px;
+	height: 135px;
+	padding: 14px;
+	background: url(https://{WIKILOC}/newmarket/frame.png) no-repeat;
 }}
 
 /* header
 ********************************************************/
 .datepicker_vista .header {{
-    position: relative;
-    height: 15px;
-    margin-bottom: 5px;
-    padding-top: 1px;
+	position: relative;
+	height: 15px;
+	margin-bottom: 5px;
+	padding-top: 1px;
 }}
 
 .datepicker_vista .header .title {{
-    text-align: center;
-    margin: 0 18px 0 18px;
+	text-align: center;
+	margin: 0 18px 0 18px;
 }}
 
 .datepicker_vista .header .titleText {{
@@ -236,192 +242,192 @@ DATESTYLE = Rf'''
 .datepicker_vista .header .previous,
 .datepicker_vista .header .next,
 .datepicker_vista .header .closeButton {{
-    position: absolute;
-    cursor: pointer;
-    text-indent: -40px;
-    overflow: hidden;
-    width: 12px;
-    height: 12px;
-    top: 2px;
-    background-image: url(https://{WIKILOC}/newmarket/buttons.png);
-    background-position: left top;
-    background-repeat: no-repeat;
+	position: absolute;
+	cursor: pointer;
+	text-indent: -40px;
+	overflow: hidden;
+	width: 12px;
+	height: 12px;
+	top: 2px;
+	background-image: url(https://{WIKILOC}/newmarket/buttons.png);
+	background-position: left top;
+	background-repeat: no-repeat;
 }}
 
 .datepicker_vista .header .previous {{
-    left: 4px;
+	left: 4px;
 }}
 .datepicker_vista .header .previous:hover {{
-    background-position: left bottom;
+	background-position: left bottom;
 }}
 .datepicker_vista .header .next {{
-    right: 4px;
-    background-position: -13px top;
+	right: 4px;
+	background-position: -13px top;
 }}
 .datepicker_vista .header .next:hover {{
-    background-position: -13px bottom;
+	background-position: -13px bottom;
 }}
 .datepicker_vista .header .closeButton {{
-    display: none;
-    right: 0px;
-    top: 0px;
-    background-position: right top;
+	display: none;
+	right: 0px;
+	top: 0px;
+	background-position: right top;
 }}
 .datepicker_vista .header .closeButton:hover {{
-    background-position: right bottom;
+	background-position: right bottom;
 }}
 
 /* body
 ********************************************************/
 .datepicker_vista .body {{
-    position: relative;
-    top: 0px;
-    left: 2px;
-    width: 168px;
-    height: 112px;
-    overflow: hidden;
+	position: relative;
+	top: 0px;
+	left: 2px;
+	width: 168px;
+	height: 112px;
+	overflow: hidden;
 }}
 
 /* time
 ********************************************************/
 .datepicker_vista .time {{
-    position: relative;
-    width: 100%;
-    height: 100%;
+	position: relative;
+	width: 100%;
+	height: 100%;
 }}
 
 .datepicker_vista .time .hour,
 .datepicker_vista .time .separator,
 .datepicker_vista .time .minutes {{
-    border: 1px solid #ccc;
-    background: #fff;
-    width: 50px;
-    font-size: 32px;
-    position: absolute;
-    top: 10px;
-    text-align: center;
-    padding: 2px;
+	border: 1px solid #ccc;
+	background: #fff;
+	width: 50px;
+	font-size: 32px;
+	position: absolute;
+	top: 10px;
+	text-align: center;
+	padding: 2px;
 }}
 
 .datepicker_vista .time .hour {{
-    left: 15px;
+	left: 15px;
 }}
 .datepicker_vista .time .separator {{
-    background: transparent;
-    border: 0px;
-    width: 10px;
-    left: 76px;
+	background: transparent;
+	border: 0px;
+	width: 10px;
+	left: 76px;
 }}
 
 .datepicker_vista .time .minutes {{
-    left: 95px;
+	left: 95px;
 }}
 .datepicker_vista .time .ok {{
-    position: absolute;
-    top: 65px;
-    width: 136px;
-    left: 15px;
-    font-size: 20px;
+	position: absolute;
+	top: 65px;
+	width: 136px;
+	left: 15px;
+	font-size: 20px;
 }}
 
 /* days-grid
 ********************************************************/
 .datepicker_vista .days .day {{
-    float: left;
-    text-align: center;
-    overflow: hidden;
-    width: 23px;
-    height: 15px;
-    margin: 0 1px 1px 0;
+	float: left;
+	text-align: center;
+	overflow: hidden;
+	width: 23px;
+	height: 15px;
+	margin: 0 1px 1px 0;
 }}
 .datepicker_vista .days .titles {{
-    height: 15px;
-    border-bottom: 1px solid #e0e0e0;
-    margin-bottom: 1px;
+	height: 15px;
+	border-bottom: 1px solid #e0e0e0;
+	margin-bottom: 1px;
 }}
 .datepicker_vista .days .day0 {{
-    margin-right: 0;
+	margin-right: 0;
 }}
 
 .datepicker_vista .days .week5 .day {{
-    margin-bottom: 0;
+	margin-bottom: 0;
 }}
 
 /* days-colors
 ********************************************************/
 .datepicker_vista .days .week .day {{
-    cursor: pointer;
+	cursor: pointer;
 }}
 .datepicker_vista .days .week .day:hover {{
-    background: url(https://{WIKILOC}/newmarket/days.png) left top no-repeat;
-    color: #0084AA;
+	background: url(https://{WIKILOC}/newmarket/days.png) left top no-repeat;
+	color: #0084AA;
 }}
 
 .datepicker_vista .days .otherMonth {{
-    color: #aaa;
+	color: #aaa;
 }}
 
 .datepicker_vista .days .selected {{
-    background: url(https://{WIKILOC}/newmarket/days.png) left bottom no-repeat;
-    color: #316879;
+	background: url(https://{WIKILOC}/newmarket/days.png) left bottom no-repeat;
+	color: #316879;
 }}
 
 /* months-grid
 ********************************************************/
 .datepicker_vista .months .month {{
-    float: left;
-    cursor: pointer;
-    text-align: center;
-    padding-top: 6px;
-    width: 55px;
-    overflow: hidden;
-    height: 21px;
-    margin: 0 1px 1px 0;
+	float: left;
+	cursor: pointer;
+	text-align: center;
+	padding-top: 6px;
+	width: 55px;
+	overflow: hidden;
+	height: 21px;
+	margin: 0 1px 1px 0;
 }}
 
 .datepicker_vista .months .month3,
 .datepicker_vista .months .month6,
 .datepicker_vista .months .month9,
 .datepicker_vista .months .month12 {{
-    margin-right: 0;
+	margin-right: 0;
 }}
 
 .datepicker_vista .months .month10,
 .datepicker_vista .months .month11,
 .datepicker_vista .months .month12 {{
-    margin-bottom: 0;
+	margin-bottom: 0;
 }}
 
 /* months-colors
 ********************************************************/
 .datepicker_vista .months .month:hover {{
-    background: url(https://{WIKILOC}/newmarket/months.png) left top no-repeat;
-    color: #0084AA;
+	background: url(https://{WIKILOC}/newmarket/months.png) left top no-repeat;
+	color: #0084AA;
 }}
 
 .datepicker_vista .months .selected {{
-    background: url(https://{WIKILOC}/newmarket/months.png) left bottom no-repeat;
-    color: #316879;
+	background: url(https://{WIKILOC}/newmarket/months.png) left bottom no-repeat;
+	color: #316879;
 }}
 
 /* years-grid
 ********************************************************/
 .datepicker_vista .years .year {{
-    float: left;
-    cursor: pointer;
-    text-align: center;
-    padding-top: 6px;
-    width: 32px;
-    overflow: hidden;
-    height: 21px;
-    margin: 0 1px 1px 0;
+	float: left;
+	cursor: pointer;
+	text-align: center;
+	padding-top: 6px;
+	width: 32px;
+	overflow: hidden;
+	height: 21px;
+	margin: 0 1px 1px 0;
 }}
 
 .datepicker_vista .years .year4,
 .datepicker_vista .years .year9,
 .datepicker_vista .years .year14,
 .datepicker_vista .years .year19 {{
-    margin-right: 0;
+	margin-right: 0;
 }}
 
 .datepicker_vista .years .year15,
@@ -429,27 +435,27 @@ DATESTYLE = Rf'''
 .datepicker_vista .years .year17,
 .datepicker_vista .years .year18,
 .datepicker_vista .years .year19 {{
-    margin-bottom: 0;
+	margin-bottom: 0;
 }}
 
 /* years-colors
 ********************************************************/
 .datepicker_vista .years .year:hover {{
-    background: url(https://{WIKILOC}/newmarket/years.png) left top no-repeat;
-    color: #0084AA;
+	background: url(https://{WIKILOC}/newmarket/years.png) left top no-repeat;
+	color: #0084AA;
 }}
 
 .datepicker_vista .years .selected {{
-    background: url(https://{WIKILOC}/newmarket/years.png) left bottom no-repeat;
-    color: #316879;
+	background: url(https://{WIKILOC}/newmarket/years.png) left bottom no-repeat;
+	color: #316879;
 }}
 
 /* global
 ********************************************************/
 .datepicker_vista .unavailable {{
-    background: none !important;
-    color: #fbb !important;
-    cursor: default !important;
+	background: none !important;
+	color: #fbb !important;
+	cursor: default !important;
 }}
 </style>
 '''
@@ -613,1228 +619,1257 @@ DATEPICKER = R'''<script language="JavaScript">
  */
 
 var DatePicker = new Class({
-    
-    Implements: Options,
-    
-    // working date, which we will keep modifying to render the calendars
-    d: '',
-    
-    // just so that we need not request it over and over
-    today: '',
-    
-    // current user-choice in date object format
-    choice: {}, 
-    
-    // size of body, used to animate the sliding
-    bodysize: {}, 
-    
-    // to check availability of next/previous buttons
-    limit: {}, 
-    
-    // element references:
-    attachTo: null,    // selector for target inputs
-    picker: null,      // main datepicker container
-    slider: null,      // slider that contains both oldContents and newContents, used to animate between 2 different views
-    oldContents: null, // used in animating from-view to new-view
-    newContents: null, // used in animating from-view to new-view
-    input: null,       // original input element (used for input/output)
-    visual: null,      // visible input (used for rendering)
-    
-    options: { 
-        pickerClass: 'datepicker',
-        days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-        months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-        dayShort: 2,
-        monthShort: 3,
-        startDay: 1, // Sunday (0) through Saturday (6) - be aware that this may affect your layout, since the days on the right might have a different margin
-        timePicker: false,
-        timePickerOnly: false,
-        yearPicker: true,
-        yearsPerPage: 20,
-        format: 'd-m-Y',
-        allowEmpty: false,
-        inputOutputFormat: 'U', // default to unix timestamp
-        animationDuration: 400,
-        useFadeInOut: !Browser.Engine.trident, // dont animate fade-in/fade-out for IE
-        startView: 'month', // allowed values: {time, month, year, decades}
-        positionOffset: { x: 0, y: 0 },
-        minDate: null, // { date: '[date-string]', format: '[date-string-interpretation-format]' }
-        maxDate: null, // same as minDate
-        debug: false,
-        toggleElements: null,
-        
-        // and some event hooks:
-        onShow: $empty,   // triggered when the datepicker pops up
-        onClose: $empty,  // triggered after the datepicker is closed (destroyed)
-        onSelect: $empty  // triggered when a date is selected
-    },
+	
+	Implements: Options,
+	
+	// working date, which we will keep modifying to render the calendars
+	d: '',
+	
+	// just so that we need not request it over and over
+	today: '',
+	
+	// current user-choice in date object format
+	choice: {}, 
+	
+	// size of body, used to animate the sliding
+	bodysize: {}, 
+	
+	// to check availability of next/previous buttons
+	limit: {}, 
+	
+	// element references:
+	attachTo: null,	// selector for target inputs
+	picker: null,	  // main datepicker container
+	slider: null,	  // slider that contains both oldContents and newContents, used to animate between 2 different views
+	oldContents: null, // used in animating from-view to new-view
+	newContents: null, // used in animating from-view to new-view
+	input: null,	   // original input element (used for input/output)
+	visual: null,	  // visible input (used for rendering)
+	
+	options: { 
+		pickerClass: 'datepicker',
+		days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+		months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+		dayShort: 2,
+		monthShort: 3,
+		startDay: 1, // Sunday (0) through Saturday (6) - be aware that this may affect your layout, since the days on the right might have a different margin
+		timePicker: false,
+		timePickerOnly: false,
+		yearPicker: true,
+		yearsPerPage: 20,
+		format: 'd-m-Y',
+		allowEmpty: false,
+		inputOutputFormat: 'U', // default to unix timestamp
+		animationDuration: 400,
+		useFadeInOut: !Browser.Engine.trident, // dont animate fade-in/fade-out for IE
+		startView: 'month', // allowed values: {time, month, year, decades}
+		positionOffset: { x: 0, y: 0 },
+		minDate: null, // { date: '[date-string]', format: '[date-string-interpretation-format]' }
+		maxDate: null, // same as minDate
+		debug: false,
+		toggleElements: null,
+		
+		// and some event hooks:
+		onShow: $empty,   // triggered when the datepicker pops up
+		onClose: $empty,  // triggered after the datepicker is closed (destroyed)
+		onSelect: $empty  // triggered when a date is selected
+	},
 
 
-    initialize: function(attachTo, options) {
-        this.attachTo = attachTo;
-        this.setOptions(options).attach();
-        if (this.options.timePickerOnly) {
-            this.options.timePicker = true;
-            this.options.startView = 'time';
-        }
-        this.formatMinMaxDates();
-        document.addEvent('mousedown', this.close.bind(this));
-    },
-    
-    formatMinMaxDates: function() {
-        if (this.options.minDate && this.options.minDate.format) {
-            this.options.minDate = this.unformat(this.options.minDate.date, this.options.minDate.format);
-        }
-        if (this.options.maxDate && this.options.maxDate.format) {
-            this.options.maxDate = this.unformat(this.options.maxDate.date, this.options.maxDate.format);
-            this.options.maxDate.setHours(23);
-            this.options.maxDate.setMinutes(59);
-            this.options.maxDate.setSeconds(59);
-        }
-    },
-    
-    attach: function() {
-        // toggle the datepicker through a separate element?
-        if ($chk(this.options.toggleElements)) {
-            var togglers = $$(this.options.toggleElements);
-            document.addEvents({
-                'keydown': function(e) {
-                    if (e.key == "tab") {
-                        this.close(null, true);
-                    }
-                }.bind(this)
-            });
-        };
-        
-        // attach functionality to the inputs        
-        $$(this.attachTo).each(function(item, index) {
-            
-            // never double attach
-            if (item.retrieve('datepicker')) return;
-            
-            // determine starting value(s)
-            if ($chk(item.get('value'))) {
-                
-                var j=new Date();
-                var gmt = -j.getTimezoneOffset()/60;
+	initialize: function(attachTo, options) {
+		this.attachTo = attachTo;
+		this.setOptions(options).attach();
+		if (this.options.timePickerOnly) {
+			this.options.timePicker = true;
+			this.options.startView = 'time';
+		}
+		this.formatMinMaxDates();
+		document.addEvent('mousedown', this.close.bind(this));
+	},
+	
+	formatMinMaxDates: function() {
+		if (this.options.minDate && this.options.minDate.format) {
+			this.options.minDate = this.unformat(this.options.minDate.date, this.options.minDate.format);
+		}
+		if (this.options.maxDate && this.options.maxDate.format) {
+			this.options.maxDate = this.unformat(this.options.maxDate.date, this.options.maxDate.format);
+			this.options.maxDate.setHours(23);
+			this.options.maxDate.setMinutes(59);
+			this.options.maxDate.setSeconds(59);
+		}
+	},
+	
+	attach: function() {
+		// toggle the datepicker through a separate element?
+		if ($chk(this.options.toggleElements)) {
+			var togglers = $$(this.options.toggleElements);
+			document.addEvents({
+				'keydown': function(e) {
+					if (e.key == "tab") {
+						this.close(null, true);
+					}
+				}.bind(this)
+			});
+		};
+		
+		// attach functionality to the inputs		
+		$$(this.attachTo).each(function(item, index) {
+			
+			// never double attach
+			if (item.retrieve('datepicker')) return;
+			
+			// determine starting value(s)
+			if ($chk(item.get('value'))) {
+				
+				var j=new Date();
+				var gmt = -j.getTimezoneOffset()/60;
 
-                var lessthan = 5 + gmt;
+				var lessthan = 5 + gmt;
 
-                var secs = 60 * 60 * lessthan;
+				var secs = 60 * 60 * lessthan;
 
-                var newstamp = item.get('value')-secs;
-                
-                var init_clone_val = this.format(new Date(this.unformat(newstamp, this.options.inputOutputFormat)), this.options.format);
-            } else if (!this.options.allowEmpty) {
-                var init_clone_val = this.format(new Date(), this.options.format);
-            } else {
-                var init_clone_val = '';
-            }
-            
-            // create clone
-            var display = item.getStyle('display');
-            var clone = item
-            .setStyle('display', this.options.debug ? display : 'none')
-            .store('datepicker', true) // to prevent double attachment...
-            .clone()
-            .store('datepicker', true) // ...even for the clone (!)
-            .removeProperty('name')    // secure clean (form)submission
-            .setStyle('display', display)
-            .set('value', init_clone_val)
-            .inject(item, 'after');
-            
-            // events
-            if ($chk(this.options.toggleElements)) {
-                togglers[index]
-                    .setStyle('cursor', 'pointer')
-                    .addEvents({
-                        'click': function(e) {
-                            this.onFocus(item, clone);
-                        }.bind(this)
-                    });
-                clone.addEvents({
-                    'blur': function() {
-                        item.set('value', clone.get('value'));
-                    }
-                });
-            } else {
-                clone.addEvents({
-                    'keydown': function(e) {
-                        if (this.options.allowEmpty && (e.key == "delete" || e.key == "backspace")) {
-                            item.set('value', '');
-                            e.target.set('value', '');
-                            this.close(null, true);
-                        } else if (e.key == "tab") {
-                            this.close(null, true);
-                        } else {
-                            e.stop();
-                        }
-                    }.bind(this),
-                    'focus': function(e) {
-                        this.onFocus(item, clone);
-                    }.bind(this)
-                });
-            }
-        }.bind(this));
-    },
-    
-    onFocus: function(original_input, visual_input) {
-        var init_visual_date, d = visual_input.getCoordinates();
-        
-        if ($chk(original_input.get('value'))) {
-            init_visual_date = this.unformat(original_input.get('value'), this.options.inputOutputFormat).valueOf();
-        } else {
-            init_visual_date = new Date();
-            if ($chk(this.options.maxDate) && init_visual_date.valueOf() > this.options.maxDate.valueOf()) {
-                init_visual_date = new Date(this.options.maxDate.valueOf());
-            }
-            if ($chk(this.options.minDate) && init_visual_date.valueOf() < this.options.minDate.valueOf()) {
-                init_visual_date = new Date(this.options.minDate.valueOf());
-            }
-        }
-        
-        this.show({ left: d.left + this.options.positionOffset.x, top: d.top + d.height + this.options.positionOffset.y }, init_visual_date);
-        this.input = original_input;
-        this.visual = visual_input;
-        this.options.onShow();
-    },
-    
-    dateToObject: function(d) {
-        
-        return {
-            year: d.getFullYear(),
-            month: d.getMonth(),
-            day: d.getDate(),
-            hours: d.getHours(),
-            minutes: d.getMinutes(),
-            seconds: d.getSeconds()
-        };
-    },
-    
-    dateFromObject: function(values) {
-        var d = new Date();
-        d.setDate(1);
-        ['year', 'month', 'day', 'hours', 'minutes', 'seconds'].each(function(type) {
-            var v = values[type];
-            if (!$chk(v)) return;
-            switch (type) {
-                case 'day': d.setDate(v); break;
-                case 'month': d.setMonth(v); break;
-                case 'year': d.setFullYear(v); break;
-                case 'hours': d.setHours(v); break;
-                case 'minutes': d.setMinutes(v); break;
-                case 'seconds': d.setSeconds(v); break;
-            }
-        });
-        return d;
-    },
-    
-    show: function(position, timestamp) {
-        this.formatMinMaxDates();
-        if ($chk(timestamp)) {
-            this.d = new Date(timestamp);
-        } else {
-            this.d = new Date();
-        }
+				var newstamp = item.get('value')-secs;
+				
+				var init_clone_val = this.format(new Date(this.unformat(newstamp, this.options.inputOutputFormat)), this.options.format);
+			} else if (!this.options.allowEmpty) {
+				var init_clone_val = this.format(new Date(), this.options.format);
+			} else {
+				var init_clone_val = '';
+			}
+			
+			// create clone
+			var display = item.getStyle('display');
+			var clone = item
+			.setStyle('display', this.options.debug ? display : 'none')
+			.store('datepicker', true) // to prevent double attachment...
+			.clone()
+			.store('datepicker', true) // ...even for the clone (!)
+			.removeProperty('name')	// secure clean (form)submission
+			.setStyle('display', display)
+			.set('value', init_clone_val)
+			.inject(item, 'after');
+			
+			// events
+			if ($chk(this.options.toggleElements)) {
+				togglers[index]
+					.setStyle('cursor', 'pointer')
+					.addEvents({
+						'click': function(e) {
+							this.onFocus(item, clone);
+						}.bind(this)
+					});
+				clone.addEvents({
+					'blur': function() {
+						item.set('value', clone.get('value'));
+					}
+				});
+			} else {
+				clone.addEvents({
+					'keydown': function(e) {
+						if (this.options.allowEmpty && (e.key == "delete" || e.key == "backspace")) {
+							item.set('value', '');
+							e.target.set('value', '');
+							this.close(null, true);
+						} else if (e.key == "tab") {
+							this.close(null, true);
+						} else {
+							e.stop();
+						}
+					}.bind(this),
+					'focus': function(e) {
+						this.onFocus(item, clone);
+					}.bind(this)
+				});
+			}
+		}.bind(this));
+	},
+	
+	onFocus: function(original_input, visual_input) {
+		var init_visual_date, d = visual_input.getCoordinates();
+		
+		if ($chk(original_input.get('value'))) {
+			init_visual_date = this.unformat(original_input.get('value'), this.options.inputOutputFormat).valueOf();
+		} else {
+			init_visual_date = new Date();
+			if ($chk(this.options.maxDate) && init_visual_date.valueOf() > this.options.maxDate.valueOf()) {
+				init_visual_date = new Date(this.options.maxDate.valueOf());
+			}
+			if ($chk(this.options.minDate) && init_visual_date.valueOf() < this.options.minDate.valueOf()) {
+				init_visual_date = new Date(this.options.minDate.valueOf());
+			}
+		}
+		
+		this.show({ left: d.left + this.options.positionOffset.x, top: d.top + d.height + this.options.positionOffset.y }, init_visual_date);
+		this.input = original_input;
+		this.visual = visual_input;
+		this.options.onShow();
+	},
+	
+	dateToObject: function(d) {
+		
+		return {
+			year: d.getFullYear(),
+			month: d.getMonth(),
+			day: d.getDate(),
+			hours: d.getHours(),
+			minutes: d.getMinutes(),
+			seconds: d.getSeconds()
+		};
+	},
+	
+	dateFromObject: function(values) {
+		var d = new Date();
+		d.setDate(1);
+		['year', 'month', 'day', 'hours', 'minutes', 'seconds'].each(function(type) {
+			var v = values[type];
+			if (!$chk(v)) return;
+			switch (type) {
+				case 'day': d.setDate(v); break;
+				case 'month': d.setMonth(v); break;
+				case 'year': d.setFullYear(v); break;
+				case 'hours': d.setHours(v); break;
+				case 'minutes': d.setMinutes(v); break;
+				case 'seconds': d.setSeconds(v); break;
+			}
+		});
+		return d;
+	},
+	
+	show: function(position, timestamp) {
+		this.formatMinMaxDates();
+		if ($chk(timestamp)) {
+			this.d = new Date(timestamp);
+		} else {
+			this.d = new Date();
+		}
 
-        this.today = new Date();
-        this.choice = this.dateToObject(this.d);
-        this.mode = (this.options.startView == 'time' && !this.options.timePicker) ? 'month' : this.options.startView;
-        this.render();
-        this.picker.setStyles(position);
-    },
-    
-    render: function(fx) {
-        if (!$chk(this.picker)) {
-            this.constructPicker();
-        } else {
-            // swap contents so we can fill the newContents again and animate
-            var o = this.oldContents;
-            this.oldContents = this.newContents;
-            this.newContents = o;
-            this.newContents.empty();
-        }
-        
-        // remember current working date
-        var startDate = new Date(this.d.getTime());
-        
-        // intially assume both left and right are allowed
-        this.limit = { right: false, left: false };
-        
-        // render! booty!
-        if (this.mode == 'decades') {
-            this.renderDecades();
-        } else if (this.mode == 'year') {
-            this.renderYear();
-        } else if (this.mode == 'time') {
-            this.renderTime();
-            this.limit = { right: true, left: true }; // no left/right in timeview
-        } else {
-            this.renderMonth();
-        }
-        
-        this.picker.getElement('.previous').setStyle('visibility', this.limit.left ? 'hidden' : 'visible');
-        this.picker.getElement('.next').setStyle('visibility', this.limit.right ? 'hidden' : 'visible');
-        this.picker.getElement('.titleText').setStyle('cursor', this.allowZoomOut() ? 'pointer' : 'default');
-        
-        // restore working date
-        this.d = startDate;
-        
-        // if ever the opacity is set to '0' it was only to have us fade it in here
-        // refer to the constructPicker() function, which instantiates the picker at opacity 0 when fading is desired
-        if (this.picker.getStyle('opacity') == 0) {
-            this.picker.tween('opacity', 0, 1);
-        }
-        
-        // animate
-        if ($chk(fx)) this.fx(fx);
-    },
-    
-    fx: function(fx) {
-        if (fx == 'right') {
-            this.oldContents.setStyles({ left: 0, opacity: 1 });
-            this.newContents.setStyles({ left: this.bodysize.x, opacity: 1 });
-            this.slider.setStyle('left', 0).tween('left', 0, -this.bodysize.x);
-        } else if (fx == 'left') {
-            this.oldContents.setStyles({ left: this.bodysize.x, opacity: 1 });
-            this.newContents.setStyles({ left: 0, opacity: 1 });
-            this.slider.setStyle('left', -this.bodysize.x).tween('left', -this.bodysize.x, 0);
-        } else if (fx == 'fade') {
-            this.slider.setStyle('left', 0);
-            this.oldContents.setStyle('left', 0).set('tween', { duration: this.options.animationDuration / 2 }).tween('opacity', 1, 0);
-            this.newContents.setStyles({ opacity: 0, left: 0}).set('tween', { duration: this.options.animationDuration }).tween('opacity', 0, 1);
-        }
-    },
-    
-    constructPicker: function() {
-        this.picker = new Element('div', { 'class': this.options.pickerClass }).inject(document.body);
-        if (this.options.useFadeInOut) {
-            this.picker.setStyle('opacity', 0).set('tween', { duration: this.options.animationDuration });
-        }
-        
-        var h = new Element('div', { 'class': 'header' }).inject(this.picker);
-        var titlecontainer = new Element('div', { 'class': 'title' }).inject(h);
-        new Element('div', { 'class': 'previous' }).addEvent('click', this.previous.bind(this)).set('text', 'Â«').inject(h);
-        new Element('div', { 'class': 'next' }).addEvent('click', this.next.bind(this)).set('text', 'Â»').inject(h);
-        new Element('div', { 'class': 'closeButton' }).addEvent('click', this.close.bindWithEvent(this, true)).set('text', 'x').inject(h);
-        new Element('span', { 'class': 'titleText' }).addEvent('click', this.zoomOut.bind(this)).inject(titlecontainer);
-        
-        var b = new Element('div', { 'class': 'body' }).inject(this.picker);
-        this.bodysize = b.getSize();
-        this.slider = new Element('div', { styles: { position: 'absolute', top: 0, left: 0, width: 2 * this.bodysize.x, height: this.bodysize.y }})
-                    .set('tween', { duration: this.options.animationDuration, transition: Fx.Transitions.Quad.easeInOut }).inject(b);
-        this.oldContents = new Element('div', { styles: { position: 'absolute', top: 0, left: this.bodysize.x, width: this.bodysize.x, height: this.bodysize.y }}).inject(this.slider);
-        this.newContents = new Element('div', { styles: { position: 'absolute', top: 0, left: 0, width: this.bodysize.x, height: this.bodysize.y }}).inject(this.slider);
-    },
-    
-    renderTime: function() {
-        var container = new Element('div', { 'class': 'time' }).inject(this.newContents);
-        
-        if (this.options.timePickerOnly) {
-            this.picker.getElement('.titleText').set('text', 'Select a time');
-        } else {
-            this.picker.getElement('.titleText').set('text', this.format(this.d, 'j M, Y'));
-        }
-        
-        new Element('input', { type: 'text', 'class': 'hour' })
-            .set('value', this.leadZero(this.d.getHours()))
-            .addEvents({
-                mousewheel: function(e) {
-                    var i = e.target, v = i.get('value').toInt();
-                    i.focus();
-                    if (e.wheel > 0) {
-                        v = (v < 23) ? v + 1 : 0;
-                    } else {
-                        v = (v > 0) ? v - 1 : 23;
-                    }
-                    i.set('value', this.leadZero(v));
-                    e.stop();
-                }.bind(this)
-            })
-            .set('maxlength', 2)
-            .inject(container);
-            
-        new Element('input', { type: 'text', 'class': 'minutes' })
-            .set('value', this.leadZero(this.d.getMinutes()))
-            .addEvents({
-                mousewheel: function(e) {
-                    var i = e.target, v = i.get('value').toInt();
-                    i.focus();
-                    if (e.wheel > 0) {
-                        v = (v < 59) ? v + 1 : 0;
-                    } else {
-                        v = (v > 0) ? v - 1 : 59;
-                    }
-                    i.set('value', this.leadZero(v));
-                    e.stop();
-                }.bind(this)
-            })
-            .set('maxlength', 2)
-            .inject(container);
-        
-        new Element('div', { 'class': 'separator' }).set('text', ':').inject(container);
-        
-        new Element('input', { type: 'submit', value: 'OK', 'class': 'ok' })
-            .addEvents({
-                click: function(e) {
-                    e.stop();
-                    this.select($merge(this.dateToObject(this.d), { hours: this.picker.getElement('.hour').get('value').toInt(), minutes: this.picker.getElement('.minutes').get('value').toInt() }));
-                }.bind(this)
-            })
-            .set('maxlength', 2)
-            .inject(container);
-    },
-    
-    renderMonth: function() {
-        var month = this.d.getMonth();
-        
-        this.picker.getElement('.titleText').set('text', this.options.months[month] + ' ' + this.d.getFullYear());
-        
-        this.d.setDate(1);
-        while (this.d.getDay() != this.options.startDay) {
-            this.d.setDate(this.d.getDate() - 1);
-        }
-        
-        var container = new Element('div', { 'class': 'days' }).inject(this.newContents);
-        var titles = new Element('div', { 'class': 'titles' }).inject(container);
-        var d, i, classes, e, weekcontainer;
+		this.today = new Date();
+		this.choice = this.dateToObject(this.d);
+		this.mode = (this.options.startView == 'time' && !this.options.timePicker) ? 'month' : this.options.startView;
+		this.render();
+		this.picker.setStyles(position);
+	},
+	
+	render: function(fx) {
+		if (!$chk(this.picker)) {
+			this.constructPicker();
+		} else {
+			// swap contents so we can fill the newContents again and animate
+			var o = this.oldContents;
+			this.oldContents = this.newContents;
+			this.newContents = o;
+			this.newContents.empty();
+		}
+		
+		// remember current working date
+		var startDate = new Date(this.d.getTime());
+		
+		// intially assume both left and right are allowed
+		this.limit = { right: false, left: false };
+		
+		// render! booty!
+		if (this.mode == 'decades') {
+			this.renderDecades();
+		} else if (this.mode == 'year') {
+			this.renderYear();
+		} else if (this.mode == 'time') {
+			this.renderTime();
+			this.limit = { right: true, left: true }; // no left/right in timeview
+		} else {
+			this.renderMonth();
+		}
+		
+		this.picker.getElement('.previous').setStyle('visibility', this.limit.left ? 'hidden' : 'visible');
+		this.picker.getElement('.next').setStyle('visibility', this.limit.right ? 'hidden' : 'visible');
+		this.picker.getElement('.titleText').setStyle('cursor', this.allowZoomOut() ? 'pointer' : 'default');
+		
+		// restore working date
+		this.d = startDate;
+		
+		// if ever the opacity is set to '0' it was only to have us fade it in here
+		// refer to the constructPicker() function, which instantiates the picker at opacity 0 when fading is desired
+		if (this.picker.getStyle('opacity') == 0) {
+			this.picker.tween('opacity', 0, 1);
+		}
+		
+		// animate
+		if ($chk(fx)) this.fx(fx);
+	},
+	
+	fx: function(fx) {
+		if (fx == 'right') {
+			this.oldContents.setStyles({ left: 0, opacity: 1 });
+			this.newContents.setStyles({ left: this.bodysize.x, opacity: 1 });
+			this.slider.setStyle('left', 0).tween('left', 0, -this.bodysize.x);
+		} else if (fx == 'left') {
+			this.oldContents.setStyles({ left: this.bodysize.x, opacity: 1 });
+			this.newContents.setStyles({ left: 0, opacity: 1 });
+			this.slider.setStyle('left', -this.bodysize.x).tween('left', -this.bodysize.x, 0);
+		} else if (fx == 'fade') {
+			this.slider.setStyle('left', 0);
+			this.oldContents.setStyle('left', 0).set('tween', { duration: this.options.animationDuration / 2 }).tween('opacity', 1, 0);
+			this.newContents.setStyles({ opacity: 0, left: 0}).set('tween', { duration: this.options.animationDuration }).tween('opacity', 0, 1);
+		}
+	},
+	
+	constructPicker: function() {
+		this.picker = new Element('div', { 'class': this.options.pickerClass }).inject(document.body);
+		if (this.options.useFadeInOut) {
+			this.picker.setStyle('opacity', 0).set('tween', { duration: this.options.animationDuration });
+		}
+		
+		var h = new Element('div', { 'class': 'header' }).inject(this.picker);
+		var titlecontainer = new Element('div', { 'class': 'title' }).inject(h);
+		new Element('div', { 'class': 'previous' }).addEvent('click', this.previous.bind(this)).set('text', 'Â«').inject(h);
+		new Element('div', { 'class': 'next' }).addEvent('click', this.next.bind(this)).set('text', 'Â»').inject(h);
+		new Element('div', { 'class': 'closeButton' }).addEvent('click', this.close.bindWithEvent(this, true)).set('text', 'x').inject(h);
+		new Element('span', { 'class': 'titleText' }).addEvent('click', this.zoomOut.bind(this)).inject(titlecontainer);
+		
+		var b = new Element('div', { 'class': 'body' }).inject(this.picker);
+		this.bodysize = b.getSize();
+		this.slider = new Element('div', { styles: { position: 'absolute', top: 0, left: 0, width: 2 * this.bodysize.x, height: this.bodysize.y }})
+					.set('tween', { duration: this.options.animationDuration, transition: Fx.Transitions.Quad.easeInOut }).inject(b);
+		this.oldContents = new Element('div', { styles: { position: 'absolute', top: 0, left: this.bodysize.x, width: this.bodysize.x, height: this.bodysize.y }}).inject(this.slider);
+		this.newContents = new Element('div', { styles: { position: 'absolute', top: 0, left: 0, width: this.bodysize.x, height: this.bodysize.y }}).inject(this.slider);
+	},
+	
+	renderTime: function() {
+		var container = new Element('div', { 'class': 'time' }).inject(this.newContents);
+		
+		if (this.options.timePickerOnly) {
+			this.picker.getElement('.titleText').set('text', 'Select a time');
+		} else {
+			this.picker.getElement('.titleText').set('text', this.format(this.d, 'j M, Y'));
+		}
+		
+		new Element('input', { type: 'text', 'class': 'hour' })
+			.set('value', this.leadZero(this.d.getHours()))
+			.addEvents({
+				mousewheel: function(e) {
+					var i = e.target, v = i.get('value').toInt();
+					i.focus();
+					if (e.wheel > 0) {
+						v = (v < 23) ? v + 1 : 0;
+					} else {
+						v = (v > 0) ? v - 1 : 23;
+					}
+					i.set('value', this.leadZero(v));
+					e.stop();
+				}.bind(this)
+			})
+			.set('maxlength', 2)
+			.inject(container);
+			
+		new Element('input', { type: 'text', 'class': 'minutes' })
+			.set('value', this.leadZero(this.d.getMinutes()))
+			.addEvents({
+				mousewheel: function(e) {
+					var i = e.target, v = i.get('value').toInt();
+					i.focus();
+					if (e.wheel > 0) {
+						v = (v < 59) ? v + 1 : 0;
+					} else {
+						v = (v > 0) ? v - 1 : 59;
+					}
+					i.set('value', this.leadZero(v));
+					e.stop();
+				}.bind(this)
+			})
+			.set('maxlength', 2)
+			.inject(container);
+		
+		new Element('div', { 'class': 'separator' }).set('text', ':').inject(container);
+		
+		new Element('input', { type: 'submit', value: 'OK', 'class': 'ok' })
+			.addEvents({
+				click: function(e) {
+					e.stop();
+					this.select($merge(this.dateToObject(this.d), { hours: this.picker.getElement('.hour').get('value').toInt(), minutes: this.picker.getElement('.minutes').get('value').toInt() }));
+				}.bind(this)
+			})
+			.set('maxlength', 2)
+			.inject(container);
+	},
+	
+	renderMonth: function() {
+		var month = this.d.getMonth();
+		
+		this.picker.getElement('.titleText').set('text', this.options.months[month] + ' ' + this.d.getFullYear());
+		
+		this.d.setDate(1);
+		while (this.d.getDay() != this.options.startDay) {
+			this.d.setDate(this.d.getDate() - 1);
+		}
+		
+		var container = new Element('div', { 'class': 'days' }).inject(this.newContents);
+		var titles = new Element('div', { 'class': 'titles' }).inject(container);
+		var d, i, classes, e, weekcontainer;
 
-        for (d = this.options.startDay; d < (this.options.startDay + 7); d++) {
-            new Element('div', { 'class': 'title day day' + (d % 7) }).set('text', this.options.days[(d % 7)].substring(0,this.options.dayShort)).inject(titles);
-        }
-        
-        var available = false;
-        var t = this.today.toDateString();
-        var currentChoice = this.dateFromObject(this.choice).toDateString();
-        
-        for (i = 0; i < 42; i++) {
-            classes = [];
-            classes.push('day');
-            classes.push('day'+this.d.getDay());
-            if (this.d.toDateString() == t) classes.push('today');
-            if (this.d.toDateString() == currentChoice) classes.push('selected');
-            if (this.d.getMonth() != month) classes.push('otherMonth');
-            
-            if (i % 7 == 0) {
-                weekcontainer = new Element('div', { 'class': 'week week'+(Math.floor(i/7)) }).inject(container);
-            }
-            
-            e = new Element('div', { 'class': classes.join(' ') }).set('text', this.d.getDate()).inject(weekcontainer);
-            if (this.limited('date')) {
-                e.addClass('unavailable');
-                if (available) {
-                    this.limit.right = true;
-                } else if (this.d.getMonth() == month) {
-                    this.limit.left = true;
-                }
-            } else {
-                available = true;
-                e.addEvent('click', function(e, d) {
-                    if (this.options.timePicker) {
-                        this.d.setDate(d.day);
-                        this.d.setMonth(d.month);
-                        this.mode = 'time';
-                        this.render('fade');
-                    } else {
-                        this.select(d);
-                    }
-                }.bindWithEvent(this, { day: this.d.getDate(), month: this.d.getMonth(), year: this.d.getFullYear() }));
-            }
-            this.d.setDate(this.d.getDate() + 1);
-        }
-        if (!available) this.limit.right = true;
-    },
-    
-    renderYear: function() {
-        var month = this.today.getMonth();
-        var thisyear = this.d.getFullYear() == this.today.getFullYear();
-        var selectedyear = this.d.getFullYear() == this.choice.year;
-        
-        this.picker.getElement('.titleText').set('text', this.d.getFullYear());
-        this.d.setMonth(0);
-        
-        var i, e;
-        var available = false;
-        var container = new Element('div', { 'class': 'months' }).inject(this.newContents);
-        
-        for (i = 0; i <= 11; i++) {
-            e = new Element('div', { 'class': 'month month'+(i+1)+(i == month && thisyear ? ' today' : '')+(i == this.choice.month && selectedyear ? ' selected' : '') })
-            .set('text', this.options.monthShort ? this.options.months[i].substring(0, this.options.monthShort) : this.options.months[i]).inject(container);
-            
-            if (this.limited('month')) {
-                e.addClass('unavailable');
-                if (available) {
-                    this.limit.right = true;
-                } else {
-                    this.limit.left = true;
-                }
-            } else {
-                available = true;
-                e.addEvent('click', function(e, d) {
-                    this.d.setDate(1);
-                    this.d.setMonth(d);
-                    this.mode = 'month';
-                    this.render('fade');
-                }.bindWithEvent(this, i));
-            }
-            this.d.setMonth(i);
-        }
-        if (!available) this.limit.right = true;
-    },
-    
-    renderDecades: function() {
-        // start neatly at interval (eg. 1980 instead of 1987)
-        while (this.d.getFullYear() % this.options.yearsPerPage > 0) {
-            this.d.setFullYear(this.d.getFullYear() - 1);
-        }
+		for (d = this.options.startDay; d < (this.options.startDay + 7); d++) {
+			new Element('div', { 'class': 'title day day' + (d % 7) }).set('text', this.options.days[(d % 7)].substring(0,this.options.dayShort)).inject(titles);
+		}
+		
+		var available = false;
+		var t = this.today.toDateString();
+		var currentChoice = this.dateFromObject(this.choice).toDateString();
+		
+		for (i = 0; i < 42; i++) {
+			classes = [];
+			classes.push('day');
+			classes.push('day'+this.d.getDay());
+			if (this.d.toDateString() == t) classes.push('today');
+			if (this.d.toDateString() == currentChoice) classes.push('selected');
+			if (this.d.getMonth() != month) classes.push('otherMonth');
+			
+			if (i % 7 == 0) {
+				weekcontainer = new Element('div', { 'class': 'week week'+(Math.floor(i/7)) }).inject(container);
+			}
+			
+			e = new Element('div', { 'class': classes.join(' ') }).set('text', this.d.getDate()).inject(weekcontainer);
+			if (this.limited('date')) {
+				e.addClass('unavailable');
+				if (available) {
+					this.limit.right = true;
+				} else if (this.d.getMonth() == month) {
+					this.limit.left = true;
+				}
+			} else {
+				available = true;
+				e.addEvent('click', function(e, d) {
+					if (this.options.timePicker) {
+						this.d.setDate(d.day);
+						this.d.setMonth(d.month);
+						this.mode = 'time';
+						this.render('fade');
+					} else {
+						this.select(d);
+					}
+				}.bindWithEvent(this, { day: this.d.getDate(), month: this.d.getMonth(), year: this.d.getFullYear() }));
+			}
+			this.d.setDate(this.d.getDate() + 1);
+		}
+		if (!available) this.limit.right = true;
+	},
+	
+	renderYear: function() {
+		var month = this.today.getMonth();
+		var thisyear = this.d.getFullYear() == this.today.getFullYear();
+		var selectedyear = this.d.getFullYear() == this.choice.year;
+		
+		this.picker.getElement('.titleText').set('text', this.d.getFullYear());
+		this.d.setMonth(0);
+		
+		var i, e;
+		var available = false;
+		var container = new Element('div', { 'class': 'months' }).inject(this.newContents);
+		
+		for (i = 0; i <= 11; i++) {
+			e = new Element('div', { 'class': 'month month'+(i+1)+(i == month && thisyear ? ' today' : '')+(i == this.choice.month && selectedyear ? ' selected' : '') })
+			.set('text', this.options.monthShort ? this.options.months[i].substring(0, this.options.monthShort) : this.options.months[i]).inject(container);
+			
+			if (this.limited('month')) {
+				e.addClass('unavailable');
+				if (available) {
+					this.limit.right = true;
+				} else {
+					this.limit.left = true;
+				}
+			} else {
+				available = true;
+				e.addEvent('click', function(e, d) {
+					this.d.setDate(1);
+					this.d.setMonth(d);
+					this.mode = 'month';
+					this.render('fade');
+				}.bindWithEvent(this, i));
+			}
+			this.d.setMonth(i);
+		}
+		if (!available) this.limit.right = true;
+	},
+	
+	renderDecades: function() {
+		// start neatly at interval (eg. 1980 instead of 1987)
+		while (this.d.getFullYear() % this.options.yearsPerPage > 0) {
+			this.d.setFullYear(this.d.getFullYear() - 1);
+		}
 
-        this.picker.getElement('.titleText').set('text', this.d.getFullYear() + '-' + (this.d.getFullYear() + this.options.yearsPerPage - 1));
-        
-        var i, y, e;
-        var available = false;
-        var container = new Element('div', { 'class': 'years' }).inject(this.newContents);
-        
-        if ($chk(this.options.minDate) && this.d.getFullYear() <= this.options.minDate.getFullYear()) {
-            this.limit.left = true;
-        }
-        
-        for (i = 0; i < this.options.yearsPerPage; i++) {
-            y = this.d.getFullYear();
-            e = new Element('div', { 'class': 'year year' + i + (y == this.today.getFullYear() ? ' today' : '') + (y == this.choice.year ? ' selected' : '') }).set('text', y).inject(container);
-            
-            if (this.limited('year')) {
-                e.addClass('unavailable');
-                if (available) {
-                    this.limit.right = true;
-                } else {
-                    this.limit.left = true;
-                }
-            } else {
-                available = true;
-                e.addEvent('click', function(e, d) {
-                    this.d.setFullYear(d);
-                    this.mode = 'year';
-                    this.render('fade');
-                }.bindWithEvent(this, y));
-            }
-            this.d.setFullYear(this.d.getFullYear() + 1);
-        }
-        if (!available) {
-            this.limit.right = true;
-        }
-        if ($chk(this.options.maxDate) && this.d.getFullYear() >= this.options.maxDate.getFullYear()) {
-            this.limit.right = true;
-        }
-    },
-    
-    limited: function(type) {
-        var cs = $chk(this.options.minDate);
-        var ce = $chk(this.options.maxDate);
-        if (!cs && !ce) return false;
-        
-        switch (type) {
-            case 'year':
-                return (cs && this.d.getFullYear() < this.options.minDate.getFullYear()) || (ce && this.d.getFullYear() > this.options.maxDate.getFullYear());
-                
-            case 'month':
-                // todo: there has got to be an easier way...?
-                var ms = ('' + this.d.getFullYear() + this.leadZero(this.d.getMonth())).toInt();
-                return cs && ms < ('' + this.options.minDate.getFullYear() + this.leadZero(this.options.minDate.getMonth())).toInt()
-                    || ce && ms > ('' + this.options.maxDate.getFullYear() + this.leadZero(this.options.maxDate.getMonth())).toInt()
-                
-            case 'date':
-                return (cs && this.d < this.options.minDate) || (ce && this.d > this.options.maxDate);
-        }
-    },
-    
-    allowZoomOut: function() {
-        if (this.mode == 'time' && this.options.timePickerOnly) return false;
-        if (this.mode == 'decades') return false;
-        if (this.mode == 'year' && !this.options.yearPicker) return false;
-        return true;
-    },
-    
-    zoomOut: function() {
-        if (!this.allowZoomOut()) return;
-        if (this.mode == 'year') {
-            this.mode = 'decades';
-        } else if (this.mode == 'time') {
-            this.mode = 'month';
-        } else {
-            this.mode = 'year';
-        }
-        this.render('fade');
-    },
-    
-    previous: function() {
-        if (this.mode == 'decades') {
-            this.d.setFullYear(this.d.getFullYear() - this.options.yearsPerPage);
-        } else if (this.mode == 'year') {
-            this.d.setFullYear(this.d.getFullYear() - 1);
-        } else if (this.mode == 'month') {
-            this.d.setMonth(this.d.getMonth() - 1);
-        }
-        this.render('left');
-    },
-    
-    next: function() {
-        if (this.mode == 'decades') {
-            this.d.setFullYear(this.d.getFullYear() + this.options.yearsPerPage);
-        } else if (this.mode == 'year') {
-            this.d.setFullYear(this.d.getFullYear() + 1);
-        } else if (this.mode == 'month') {
-            this.d.setMonth(this.d.getMonth() + 1);
-        }
-        this.render('right');
-    },
-    
-    close: function(e, force) {
-        if (!$(this.picker)) return;
-        var clickOutside = ($chk(e) && e.target != this.picker && !this.picker.hasChild(e.target) && e.target != this.visual);
-        if (force || clickOutside) {
-            if (this.options.useFadeInOut) {
-                this.picker.set('tween', { duration: this.options.animationDuration / 2, onComplete: this.destroy.bind(this) }).tween('opacity', 1, 0);
-            } else {
-                this.destroy();
-            }
-        }
-    },
-    
-    destroy: function() {
-        this.picker.destroy();
-        this.picker = null;
-        this.options.onClose();
-    },
-    
-    select: function(values) {
-        this.choice = $merge(this.choice, values);
-        var d = this.dateFromObject(this.choice);
-        this.input.set('value', this.format(d, this.options.inputOutputFormat));
-        this.visual.set('value', this.format(d, this.options.format));
-        this.options.onSelect(d);
-        this.close(null, true);
-    },
-    
-    leadZero: function(v) {
-        return v < 10 ? '0'+v : v;
-    },
-    
-    format: function(t, format) {
-        var f = '';
+		this.picker.getElement('.titleText').set('text', this.d.getFullYear() + '-' + (this.d.getFullYear() + this.options.yearsPerPage - 1));
+		
+		var i, y, e;
+		var available = false;
+		var container = new Element('div', { 'class': 'years' }).inject(this.newContents);
+		
+		if ($chk(this.options.minDate) && this.d.getFullYear() <= this.options.minDate.getFullYear()) {
+			this.limit.left = true;
+		}
+		
+		for (i = 0; i < this.options.yearsPerPage; i++) {
+			y = this.d.getFullYear();
+			e = new Element('div', { 'class': 'year year' + i + (y == this.today.getFullYear() ? ' today' : '') + (y == this.choice.year ? ' selected' : '') }).set('text', y).inject(container);
+			
+			if (this.limited('year')) {
+				e.addClass('unavailable');
+				if (available) {
+					this.limit.right = true;
+				} else {
+					this.limit.left = true;
+				}
+			} else {
+				available = true;
+				e.addEvent('click', function(e, d) {
+					this.d.setFullYear(d);
+					this.mode = 'year';
+					this.render('fade');
+				}.bindWithEvent(this, y));
+			}
+			this.d.setFullYear(this.d.getFullYear() + 1);
+		}
+		if (!available) {
+			this.limit.right = true;
+		}
+		if ($chk(this.options.maxDate) && this.d.getFullYear() >= this.options.maxDate.getFullYear()) {
+			this.limit.right = true;
+		}
+	},
+	
+	limited: function(type) {
+		var cs = $chk(this.options.minDate);
+		var ce = $chk(this.options.maxDate);
+		if (!cs && !ce) return false;
+		
+		switch (type) {
+			case 'year':
+				return (cs && this.d.getFullYear() < this.options.minDate.getFullYear()) || (ce && this.d.getFullYear() > this.options.maxDate.getFullYear());
+				
+			case 'month':
+				// todo: there has got to be an easier way...?
+				var ms = ('' + this.d.getFullYear() + this.leadZero(this.d.getMonth())).toInt();
+				return cs && ms < ('' + this.options.minDate.getFullYear() + this.leadZero(this.options.minDate.getMonth())).toInt()
+					|| ce && ms > ('' + this.options.maxDate.getFullYear() + this.leadZero(this.options.maxDate.getMonth())).toInt()
+				
+			case 'date':
+				return (cs && this.d < this.options.minDate) || (ce && this.d > this.options.maxDate);
+		}
+	},
+	
+	allowZoomOut: function() {
+		if (this.mode == 'time' && this.options.timePickerOnly) return false;
+		if (this.mode == 'decades') return false;
+		if (this.mode == 'year' && !this.options.yearPicker) return false;
+		return true;
+	},
+	
+	zoomOut: function() {
+		if (!this.allowZoomOut()) return;
+		if (this.mode == 'year') {
+			this.mode = 'decades';
+		} else if (this.mode == 'time') {
+			this.mode = 'month';
+		} else {
+			this.mode = 'year';
+		}
+		this.render('fade');
+	},
+	
+	previous: function() {
+		if (this.mode == 'decades') {
+			this.d.setFullYear(this.d.getFullYear() - this.options.yearsPerPage);
+		} else if (this.mode == 'year') {
+			this.d.setFullYear(this.d.getFullYear() - 1);
+		} else if (this.mode == 'month') {
+			this.d.setMonth(this.d.getMonth() - 1);
+		}
+		this.render('left');
+	},
+	
+	next: function() {
+		if (this.mode == 'decades') {
+			this.d.setFullYear(this.d.getFullYear() + this.options.yearsPerPage);
+		} else if (this.mode == 'year') {
+			this.d.setFullYear(this.d.getFullYear() + 1);
+		} else if (this.mode == 'month') {
+			this.d.setMonth(this.d.getMonth() + 1);
+		}
+		this.render('right');
+	},
+	
+	close: function(e, force) {
+		if (!$(this.picker)) return;
+		var clickOutside = ($chk(e) && e.target != this.picker && !this.picker.hasChild(e.target) && e.target != this.visual);
+		if (force || clickOutside) {
+			if (this.options.useFadeInOut) {
+				this.picker.set('tween', { duration: this.options.animationDuration / 2, onComplete: this.destroy.bind(this) }).tween('opacity', 1, 0);
+			} else {
+				this.destroy();
+			}
+		}
+	},
+	
+	destroy: function() {
+		this.picker.destroy();
+		this.picker = null;
+		this.options.onClose();
+	},
+	
+	select: function(values) {
+		this.choice = $merge(this.choice, values);
+		var d = this.dateFromObject(this.choice);
+		this.input.set('value', this.format(d, this.options.inputOutputFormat));
+		this.visual.set('value', this.format(d, this.options.format));
+		this.options.onSelect(d);
+		this.close(null, true);
+	},
+	
+	leadZero: function(v) {
+		return v < 10 ? '0'+v : v;
+	},
+	
+	format: function(t, format) {
+		var f = '';
 
-        var h = t.getHours();
-        var m = t.getMonth();
+		var h = t.getHours();
+		var m = t.getMonth();
 
-        for (var i = 0; i < format.length; i++) {
-            switch(format.charAt(i)) {
-                case '\\': i++; f+= format.charAt(i); break;
-                case 'y': f += (100 + t.getYear() + '').substring(1); break
-                case 'Y': f += t.getFullYear(); break;
-                case 'm': f += this.leadZero(m + 1); break;
-                case 'n': f += (m + 1); break;
-                case 'M': f += this.options.months[m].substring(0,this.options.monthShort); break;
-                case 'F': f += this.options.months[m]; break;
-                case 'd': f += this.leadZero(t.getDate()); break;
-                case 'j': f += t.getDate(); break;
-                case 'D': f += this.options.days[t.getDay()].substring(0,this.options.dayShort); break;
-                case 'l': f += this.options.days[t.getDay()]; break;
-                case 'G': f += h; break;
-                case 'H': f += this.leadZero(h); break;
-                case 'g': f += (h % 12 ? h % 12 : 12); break;
-                case 'h': f += this.leadZero(h % 12 ? h % 12 : 12); break;
-                case 'a': f += (h > 11 ? 'pm' : 'am'); break;
-                case 'A': f += (h > 11 ? 'PM' : 'AM'); break;
-                case 'i': f += this.leadZero(t.getMinutes()); break;
-                case 's': f += this.leadZero(t.getSeconds()); break;
-                case 'U': f += Math.floor(t.valueOf() / 1000); break;
-                default:  f += format.charAt(i);
-            }
-        }
-        return f;
-    },
-    
-    unformat: function(t, format) {
-        var d = new Date();
-        var a = {};
-        var c, m;
-        t = t.toString();
-        
-        for (var i = 0; i < format.length; i++) {
-            c = format.charAt(i);
-            switch(c) {
-                case '\\': r = null; i++; break;
-                case 'y': r = '[0-9]{2}'; break;
-                case 'Y': r = '[0-9]{4}'; break;
-                case 'm': r = '0[1-9]|1[012]'; break;
-                case 'n': r = '[1-9]|1[012]'; break;
-                case 'M': r = '[A-Za-z]{'+this.options.monthShort+'}'; break;
-                case 'F': r = '[A-Za-z]+'; break;
-                case 'd': r = '0[1-9]|[12][0-9]|3[01]'; break;
-                case 'j': r = '[1-9]|[12][0-9]|3[01]'; break;
-                case 'D': r = '[A-Za-z]{'+this.options.dayShort+'}'; break;
-                case 'l': r = '[A-Za-z]+'; break;
-                case 'G': 
-                case 'H': 
-                case 'g': 
-                case 'h': r = '[0-9]{1,2}'; break;
-                case 'a': r = '(am|pm)'; break;
-                case 'A': r = '(AM|PM)'; break;
-                case 'i': 
-                case 's': r = '[012345][0-9]'; break;
-                case 'U': r = '-?[0-9]+$'; break;
-                default:  r = null;
-            }
-            
-            if ($chk(r)) {
-                m = t.match('^'+r);
-                if ($chk(m)) {
-                    a[c] = m[0];
-                    t = t.substring(a[c].length);
-                } else {
-                    if (this.options.debug) alert("Fatal Error in DatePicker\n\nUnexpected format at: '"+t+"' expected format character '"+c+"' (pattern '"+r+"')");
-                    return d;
-                }
-            } else {
-                t = t.substring(1);
-            }
-        }
-        
-        for (c in a) {
-            var v = a[c];
-            switch(c) {
-                case 'y': d.setFullYear(v < 30 ? 2000 + v.toInt() : 1900 + v.toInt()); break; // assume between 1930 - 2029
-                case 'Y': d.setFullYear(v); break;
-                case 'm':
-                case 'n': d.setMonth(v - 1); break;
-                // FALL THROUGH NOTICE! "M" has no break, because "v" now is the full month (eg. 'February'), which will work with the next format "F":
-                case 'M': v = this.options.months.filter(function(item, index) { return item.substring(0,this.options.monthShort) == v }.bind(this))[0];
-                case 'F': d.setMonth(this.options.months.indexOf(v)); break;
-                case 'd':
-                case 'j': d.setDate(v); break;
-                case 'G': 
-                case 'H': d.setHours(v); break;
-                case 'g': 
-                case 'h': if (a['a'] == 'pm' || a['A'] == 'PM') { d.setHours(v == 12 ? 0 : v.toInt() + 12); } else { d.setHours(v); } break;
-                case 'i': d.setMinutes(v); break;
-                case 's': d.setSeconds(v); break;
-                case 'U': d = new Date(v.toInt() * 1000);
-            }
-        };
-        
-        return d;
-    }
+		for (var i = 0; i < format.length; i++) {
+			switch(format.charAt(i)) {
+				case '\\': i++; f+= format.charAt(i); break;
+				case 'y': f += (100 + t.getYear() + '').substring(1); break
+				case 'Y': f += t.getFullYear(); break;
+				case 'm': f += this.leadZero(m + 1); break;
+				case 'n': f += (m + 1); break;
+				case 'M': f += this.options.months[m].substring(0,this.options.monthShort); break;
+				case 'F': f += this.options.months[m]; break;
+				case 'd': f += this.leadZero(t.getDate()); break;
+				case 'j': f += t.getDate(); break;
+				case 'D': f += this.options.days[t.getDay()].substring(0,this.options.dayShort); break;
+				case 'l': f += this.options.days[t.getDay()]; break;
+				case 'G': f += h; break;
+				case 'H': f += this.leadZero(h); break;
+				case 'g': f += (h % 12 ? h % 12 : 12); break;
+				case 'h': f += this.leadZero(h % 12 ? h % 12 : 12); break;
+				case 'a': f += (h > 11 ? 'pm' : 'am'); break;
+				case 'A': f += (h > 11 ? 'PM' : 'AM'); break;
+				case 'i': f += this.leadZero(t.getMinutes()); break;
+				case 's': f += this.leadZero(t.getSeconds()); break;
+				case 'U': f += Math.floor(t.valueOf() / 1000); break;
+				default:  f += format.charAt(i);
+			}
+		}
+		return f;
+	},
+	
+	unformat: function(t, format) {
+		var d = new Date();
+		var a = {};
+		var c, m;
+		t = t.toString();
+		
+		for (var i = 0; i < format.length; i++) {
+			c = format.charAt(i);
+			switch(c) {
+				case '\\': r = null; i++; break;
+				case 'y': r = '[0-9]{2}'; break;
+				case 'Y': r = '[0-9]{4}'; break;
+				case 'm': r = '0[1-9]|1[012]'; break;
+				case 'n': r = '[1-9]|1[012]'; break;
+				case 'M': r = '[A-Za-z]{'+this.options.monthShort+'}'; break;
+				case 'F': r = '[A-Za-z]+'; break;
+				case 'd': r = '0[1-9]|[12][0-9]|3[01]'; break;
+				case 'j': r = '[1-9]|[12][0-9]|3[01]'; break;
+				case 'D': r = '[A-Za-z]{'+this.options.dayShort+'}'; break;
+				case 'l': r = '[A-Za-z]+'; break;
+				case 'G': 
+				case 'H': 
+				case 'g': 
+				case 'h': r = '[0-9]{1,2}'; break;
+				case 'a': r = '(am|pm)'; break;
+				case 'A': r = '(AM|PM)'; break;
+				case 'i': 
+				case 's': r = '[012345][0-9]'; break;
+				case 'U': r = '-?[0-9]+$'; break;
+				default:  r = null;
+			}
+			
+			if ($chk(r)) {
+				m = t.match('^'+r);
+				if ($chk(m)) {
+					a[c] = m[0];
+					t = t.substring(a[c].length);
+				} else {
+					if (this.options.debug) alert("Fatal Error in DatePicker\n\nUnexpected format at: '"+t+"' expected format character '"+c+"' (pattern '"+r+"')");
+					return d;
+				}
+			} else {
+				t = t.substring(1);
+			}
+		}
+		
+		for (c in a) {
+			var v = a[c];
+			switch(c) {
+				case 'y': d.setFullYear(v < 30 ? 2000 + v.toInt() : 1900 + v.toInt()); break; // assume between 1930 - 2029
+				case 'Y': d.setFullYear(v); break;
+				case 'm':
+				case 'n': d.setMonth(v - 1); break;
+				// FALL THROUGH NOTICE! "M" has no break, because "v" now is the full month (eg. 'February'), which will work with the next format "F":
+				case 'M': v = this.options.months.filter(function(item, index) { return item.substring(0,this.options.monthShort) == v }.bind(this))[0];
+				case 'F': d.setMonth(this.options.months.indexOf(v)); break;
+				case 'd':
+				case 'j': d.setDate(v); break;
+				case 'G': 
+				case 'H': d.setHours(v); break;
+				case 'g': 
+				case 'h': if (a['a'] == 'pm' || a['A'] == 'PM') { d.setHours(v == 12 ? 0 : v.toInt() + 12); } else { d.setHours(v); } break;
+				case 'i': d.setMinutes(v); break;
+				case 's': d.setSeconds(v); break;
+				case 'U': d = new Date(v.toInt() * 1000);
+			}
+		};
+		
+		return d;
+	}
 });
 </script>
 '''
 
+def on_aws():
+	"""Return whether running as AWS Lambda"""
+	return "LAMBDA_TASK_ROOT" in os.environ
+
+def corrected_options():
+	result = { }
+	fn = 'bonanomoj.txt'
+	if on_aws():
+		fn = os.environ['LAMBDA_TASK_ROOT']+'/'+fn
+	else:
+		fn = '/home/markmeyer/git/kol-marketplace/'+fn
+	with open(fn, 'r', encoding='utf-8') as bn:
+		ls = bn.readlines()
+		for ln in ls:
+			l = ln.split('\t')
+			result[int(l[0])] = l[3]
+	return result
 
 def extractData(datasetstr):
-    return re.findall("set value='([^']*)", datasetstr)
+	return re.findall("set value='([^']*)", datasetstr)
 
 def normalizeVmax(vmax):
-    if vmax <= 5: return 5
-    l = math.log(vmax, 10)
-    e = int(l)
-    f = l - e
-    pow10 = int(math.pow(10,e))
-    if f < 0.30103: return 2*pow10
-    if f < 0.69897: return 5*pow10
-    return 10*pow10
+	if vmax <= 5: return 5
+	l = math.log(vmax, 10)
+	e = int(l)
+	f = l - e
+	pow10 = int(math.pow(10,e))
+	if f < 0.30103: return 2*pow10
+	if f < 0.69897: return 5*pow10
+	return 10*pow10
 
 def normalizePminmax(pmin, pmax):
-    if pmin == pmax:
-        if (pmin == 0):
-            return (0, 5)
-        n = math.log(pmin, 10)
-        e = int(n)
-        f = n - e
-        pow10e = pow(10,e)
-        c = round(pmin/pow10e)*pow10e
-        return(c-pow10e, c+pow10e)
-    diff = normalizeVmax(pmax - pmin)
-    newmin = int(pmin/diff) * diff
-    newmax = (int(pmax/diff)+1) * diff
-    return (newmin, newmax)
-    
+	if pmin == pmax:
+		if (pmin == 0):
+			return (0, 5)
+		n = math.log(pmin, 10)
+		e = int(n)
+		f = n - e
+		pow10e = pow(10,e)
+		c = round(pmin/pow10e)*pow10e
+		return(c-pow10e, c+pow10e)
+	diff = normalizeVmax(pmax - pmin)
+	newmin = int(pmin/diff) * diff
+	newmax = (int(pmax/diff)+1) * diff
+	return (newmin, newmax)
+	
 def volumeAxis(vmax):
-    tx = SVG_WIDTH-5
-    ty = TOP_MARGIN + GRAPH_HEIGHT/2
-    result = f"<text x={tx} y={ty} text-anchor=middle class='volume' "
-    result = result + f" transform='rotate(-90 {tx},{ty})'>Volume</text>"
-    ybase = TOP_MARGIN + GRAPH_HEIGHT
-    tx = SIDE_MARGIN + GRAPH_WIDTH + 3
-    for i in range(6):
-        lbl = int(vmax*i/5)
-        ty = ybase - GRAPH_HEIGHT*i/5 + 3
-        result = result + f"<text x={tx} y={ty} class='volume'>{lbl:,}</text>"
-    return result
+	tx = SVG_WIDTH-5
+	ty = TOP_MARGIN + GRAPH_HEIGHT/2
+	result = f"<text x={tx} y={ty} text-anchor=middle class='volume' "
+	result = result + f" transform='rotate(-90 {tx},{ty})'>Volume</text>"
+	ybase = TOP_MARGIN + GRAPH_HEIGHT
+	tx = SIDE_MARGIN + GRAPH_WIDTH + 3
+	for i in range(6):
+		lbl = int(vmax*i/5)
+		ty = ybase - GRAPH_HEIGHT*i/5 + 3
+		result = result + f"<text x={tx} y={ty} class='volume'>{lbl:,}</text>"
+	return result
 
 def priceAxis(pmin, pmax):
-    tx = 8
-    ty = TOP_MARGIN + GRAPH_HEIGHT/2
-    result = f"<text x={tx} y={ty} text-anchor=middle class='price' "
-    result = result + f" transform='rotate(-90 {tx},{ty})'>Price</text>"
-    ybase = TOP_MARGIN + GRAPH_HEIGHT
-    tx = SIDE_MARGIN - 3
-    step = (pmax - pmin)/5
-    for i in range(6):
-        lbl = int(pmin + step*i)
-        ty = ybase - GRAPH_HEIGHT*i/5 + 3
-        result = result + f"<text x={tx} y={ty} text-anchor=end class='price'>"
-        result = result + f"{lbl:,}</text>"
-    return result
+	tx = 8
+	ty = TOP_MARGIN + GRAPH_HEIGHT/2
+	result = f"<text x={tx} y={ty} text-anchor=middle class='price' "
+	result = result + f" transform='rotate(-90 {tx},{ty})'>Price</text>"
+	ybase = TOP_MARGIN + GRAPH_HEIGHT
+	tx = SIDE_MARGIN - 3
+	step = (pmax - pmin)/5
+	for i in range(6):
+		lbl = int(pmin + step*i)
+		ty = ybase - GRAPH_HEIGHT*i/5 + 3
+		result = result + f"<text x={tx} y={ty} text-anchor=end class='price'>"
+		result = result + f"{lbl:,}</text>"
+	return result
 
 def rect(x, y, width, height, style, title):
-    result = f"<rect x='{x}' y='{y}' width='{width}' height='{height}'"
-    result = result + f" style='{style}'>"
-    if title != "":
-        result = result + "<title>" + title + "</title>"
-    return result + "</rect>\n"
+	result = f"<rect x='{x}' y='{y}' width='{width}' height='{height}'"
+	result = result + f" style='{style}'>"
+	if title != "":
+		result = result + "<title>" + title + "</title>"
+	return result + "</rect>\n"
 
 def horizontalLine(x1, x2, y, stroke):
-    result = f"<line x1={x1} y1={y} x2={x2} y2={y} "
-    result = result + f"style='stroke: {stroke}' />"
-    return result
-    
+	result = f"<line x1={x1} y1={y} x2={x2} y2={y} "
+	result = result + f"style='stroke: {stroke}' />"
+	return result
+	
 def category(x, y, text):
-    y2 = y + 3 + TOP_MARGIN
-    result = f"<text x='{x}' y='{y2}' text-anchor='end' class='dates' "
-    result = result + f"transform='rotate(-90 {x},{y2})'>{text}</text>\n"
-    return result
+	y2 = y + 3 + TOP_MARGIN
+	result = f"<text x='{x}' y='{y2}' text-anchor='end' class='dates' "
+	result = result + f"transform='rotate(-90 {x},{y2})'>{text}</text>\n"
+	return result
 
 def volumebar(x, y, width, volume, scale):
-    x2 = x - (width/2.0)
-    height = float(volume) * scale
-    y2 = y - height
-    result = f"<rect x='{x2}' y='{y2}' width='{width}' height='{height}' "
-    result = result + " style='fill: #c0c0ff; stroke: #8080ff; stroke-width: 1px'>"
-    result = result + f"<title>Volume: {volume}</title>"
-    result = result + "</rect>\n"
-    return result
+	x2 = x - (width/2.0)
+	height = float(volume) * scale
+	y2 = y - height
+	result = f"<rect x='{x2}' y='{y2}' width='{width}' height='{height}' "
+	result = result + " style='fill: #c0c0ff; stroke: #8080ff; stroke-width: 1px'>"
+	result = result + f"<title>Volume: {volume}</title>"
+	result = result + "</rect>\n"
+	return result
 
 def pricePoint(p, wid, x, y):
-    wid2 = wid/4
-    result = f"<circle cx={x} cy={y} r={wid2} style='fill:#c00000; stroke:black'>"
-    result = result + f"<title>Avg Price: {p}</title></circle>\n"
-    return result
+	wid2 = wid/4
+	result = f"<circle cx={x} cy={y} r={wid2} style='fill:#c00000; stroke:black'>"
+	result = result + f"<title>Avg Price: {p}</title></circle>\n"
+	return result
 
 def graphPrices2(tbl, pmax, pmin, startprice):
-    result = "<polyline fill='none' stroke='black' points='"
-    wid = GRAPH_WIDTH*1.0 / len(tbl)
-    pr1 = SIDE_MARGIN + wid/2.0
-    price = startprice
-    for i in range(len(tbl)):
-        p = float(tbl[i][2])    # 0 if no transactions
-        if p < 99: 
-            p = price
-        #print(f"p={p} price={price}")
-        x = pr1 + wid*i
-        y = TOP_MARGIN + GRAPH_HEIGHT * ((pmax-p)/(pmax-pmin))
-        if y <= GRAPH_BOTTOM: 
-            result = result + f"{x},{y} "
-        price = p
-        #print(f"price for next round is {price}")
-    #print(result)
-    result = result + "'/>\n"
-    for i in range(len(tbl)):
-        if tbl[i][1] > 0:
-            p = round(float(tbl[i][2]))
-            result = result + pricePoint(p, wid, pr1+wid*i, 
-                                         TOP_MARGIN + GRAPH_HEIGHT*((pmax-p)/(pmax-pmin)))
-    return result
+	result = "<polyline fill='none' stroke='black' points='"
+	wid = GRAPH_WIDTH*1.0 / len(tbl)
+	pr1 = SIDE_MARGIN + wid/2.0
+	price = startprice
+	for i in range(len(tbl)):
+		p = float(tbl[i][2])	# 0 if no transactions
+		if p < 99: 
+			p = price
+		#print(f"p={p} price={price}")
+		x = pr1 + wid*i
+		y = TOP_MARGIN + GRAPH_HEIGHT * ((pmax-p)/(pmax-pmin))
+		if y <= GRAPH_BOTTOM: 
+			result = result + f"{x},{y} "
+		price = p
+		#print(f"price for next round is {price}")
+	#print(result)
+	result = result + "'/>\n"
+	for i in range(len(tbl)):
+		if tbl[i][1] > 0:
+			p = round(float(tbl[i][2]))
+			result = result + pricePoint(p, wid, pr1+wid*i, 
+										 TOP_MARGIN + GRAPH_HEIGHT*((pmax-p)/(pmax-pmin)))
+	return result
 
 def generateChart2(startDate, endDate, tbl, maxvol, maxprice, minprice, startprice):
-    result = f"<svg viewbox='0 0 {SVG_WIDTH} {SVG_HEIGHT}' style='width:400pt'>"
-    result = result + "<style>\n"
-    result = result + "  .norm { font: bold 8px sans-serif; fill: black; }\n"
-    result = result + "  .volume { font: bold 8px sans-serif; fill: blue; }\n"
-    result = result + "  .price { font: bold 8px sans-serif; fill: red; }\n"
-    result = result + "  .dates { font: bold 8px sans-serif; fill: green; }\n"
-    result = result + "</style>\n"
-    result = result + rect(SIDE_MARGIN, TOP_MARGIN, GRAPH_WIDTH, GRAPH_HEIGHT,
-                           'fill: white; stroke-width: 1px; stroke: black;', '')
-    for i in range(4):
-        result = result + horizontalLine(SIDE_MARGIN, SIDE_MARGIN+GRAPH_WIDTH,
-                                         GRAPH_BOTTOM-(GRAPH_HEIGHT*(i+1)/5),
-                                         '#e0e0e0')
-    catwidth = GRAPH_WIDTH *1.0 / len(tbl)
-    cat1x = SIDE_MARGIN + catwidth/2.0
-    for i in range(len(tbl)):
-        result = result + category(cat1x + i*catwidth - catwidth/4, GRAPH_HEIGHT, 
-                                   (tbl[i][0]+TIMESHIFT).strftime("%Y %b %-d, %-H:%MZ"))
-    result = result + category(cat1x + 24*catwidth - catwidth/4, GRAPH_HEIGHT, 
-                                   (endDate+TIMESHIFT).strftime("%Y %b %-d, %-H:%MZ"))
-    result = result + volumeAxis(maxvol);
-    if startprice < minprice: minprice = startprice
-    if startprice > maxprice: maxprice = startprice
-    minprice, maxprice = normalizePminmax(minprice, maxprice)
-    result = result + priceAxis(minprice, maxprice);
-    for i in range(len(tbl)):
-        result = result + volumebar(cat1x + i*catwidth, GRAPH_BOTTOM,
-                                    catwidth, tbl[i][1], 
-                                    GRAPH_HEIGHT/maxvol)
-    result = result + graphPrices2(tbl, maxprice, minprice, startprice)
-    result = result + "</svg>"
-    return result
+	result = f"<svg viewbox='0 0 {SVG_WIDTH} {SVG_HEIGHT}' style='width:400pt'>"
+	result = result + "<style>\n"
+	result = result + "  .norm { font: bold 8px sans-serif; fill: black; }\n"
+	result = result + "  .volume { font: bold 8px sans-serif; fill: blue; }\n"
+	result = result + "  .price { font: bold 8px sans-serif; fill: red; }\n"
+	result = result + "  .dates { font: bold 8px sans-serif; fill: green; }\n"
+	result = result + "</style>\n"
+	result = result + rect(SIDE_MARGIN, TOP_MARGIN, GRAPH_WIDTH, GRAPH_HEIGHT,
+						   'fill: white; stroke-width: 1px; stroke: black;', '')
+	for i in range(4):
+		result = result + horizontalLine(SIDE_MARGIN, SIDE_MARGIN+GRAPH_WIDTH,
+										 GRAPH_BOTTOM-(GRAPH_HEIGHT*(i+1)/5),
+										 '#e0e0e0')
+	catwidth = GRAPH_WIDTH *1.0 / len(tbl)
+	cat1x = SIDE_MARGIN + catwidth/2.0
+	for i in range(len(tbl)):
+		result = result + category(cat1x + i*catwidth - catwidth/4, GRAPH_HEIGHT, 
+								   (tbl[i][0]+TIMESHIFT).strftime("%Y %b %-d, %-H:%MZ"))
+	result = result + category(cat1x + 24*catwidth - catwidth/4, GRAPH_HEIGHT, 
+								   (endDate+TIMESHIFT).strftime("%Y %b %-d, %-H:%MZ"))
+	result = result + volumeAxis(maxvol);
+	if startprice < minprice: minprice = startprice
+	if startprice > maxprice: maxprice = startprice
+	minprice, maxprice = normalizePminmax(minprice, maxprice)
+	result = result + priceAxis(minprice, maxprice);
+	for i in range(len(tbl)):
+		result = result + volumebar(cat1x + i*catwidth, GRAPH_BOTTOM,
+									catwidth, tbl[i][1], 
+									GRAPH_HEIGHT/maxvol)
+	result = result + graphPrices2(tbl, maxprice, minprice, startprice)
+	result = result + "</svg>"
+	return result
 
 
 # Get data from KoL directly instead of relying on Coldfront
 def fetchEconXactions(itemid, startDate, endDate):
-    startstamp = startDate.strftime('%Y%m%d%H%M%S')
-    endstamp = endDate.strftime('%Y%m%d%H%M%S')
-    url = ECON_URL + "?startstamp=" + startstamp + "&endstamp=" + endstamp 
-    url = url + "&items=" + itemid + "&source=1"    # 1 means mall only
-    econ = request.urlopen(url)
-    b = econ.read()
-    b = b.decode("utf-8", "ignore")
-    xactions = [ ]
-    for xn in b.split("\n"):
-        if xn.startswith("m,"):
-            xactions.append(xn)
-    return xactions
+	startstamp = startDate.strftime('%Y%m%d%H%M%S')
+	endstamp = endDate.strftime('%Y%m%d%H%M%S')
+	url = ECON_URL + "?startstamp=" + startstamp + "&endstamp=" + endstamp 
+	url = url + "&items=" + itemid + "&source=1"	# 1 means mall only
+	econ = request.urlopen(url)
+	b = econ.read()
+	b = b.decode("utf-8", "ignore")
+	xactions = [ ]
+	for xn in b.split("\n"):
+		if xn.startswith("m,"):
+			xactions.append(xn)
+	return xactions
 
 def fetchKoLMallTransactions(itemid, startDate, endDate):
-    dynamodb = boto3.resource('dynamodb', region_name='us-east-2')
-    table = dynamodb.Table('KoLMallTransactions')
-    startstamp = round(startDate.timestamp())
-    endstamp = round(endDate.timestamp())
-    response = table.query(
-                KeyConditionExpression =
-                    Key('id').eq(int(itemid))
-                    & Key('ts').between(startstamp, endstamp)
-                )
-    xactions = [ ]
-    for i in response['Items']:
-        q = i['q']
-        tot = i['tot']
-        dt = datetime.fromtimestamp(int(i['ts']), tz=timezone.utc)
-        dt = dt.strftime('%Y-%m-%d %H:%M:%S')
-        xactions.append(f'm,,,{itemid},{q},{tot},{dt}')
-    return xactions
+	# This was needed when we saved a copy of the mall transactions, but it's
+	# no longer needed since that was more than 2 years ago
+	xactions = [ ]
+	"""
+	dynamodb = boto3.resource('dynamodb', region_name='us-east-2')
+	table = dynamodb.Table('KoLMallTransactions')
+	startstamp = round(startDate.timestamp())
+	endstamp = round(endDate.timestamp())
+	response = table.query(
+				KeyConditionExpression =
+					Key('id').eq(int(itemid))
+					& Key('ts').between(startstamp, endstamp)
+				)
+	for i in response['Items']:
+		q = i['q']
+		tot = i['tot']
+		dt = datetime.fromtimestamp(int(i['ts']), tz=timezone.utc)
+		dt = dt.strftime('%Y-%m-%d %H:%M:%S')
+		xactions.append(f'm,,,{itemid},{q},{tot},{dt}')
+	"""
+	return xactions
 
 def fetchXactions(itemid, startDate, endDate):
-    #return fetchEconXactions(itemid, startDate, endDate)
-    return fetchKoLMallTransactions(itemid, startDate, endDate)
-    
+	#return fetchEconXactions(itemid, startDate, endDate)
+	return fetchKoLMallTransactions(itemid, startDate, endDate)
+	
 # Find the last price of the item before our timespan of interest
 def priceGoingIn(itemid, startDate):
-    price = 0
-    span = timedelta(hours=6)
-    while price == 0:
-        endDate = startDate
-        startDate = endDate - span
-        xactions = fetchXactions(itemid, startDate, endDate)
-        if len(xactions) > 0:
-            lastXaction = xactions[len(xactions)-1]
-            parts = lastXaction.split(",")
-            price = int(parts[5]) / int(parts[4])
-        else:
-            span = span * 2
-            endDate = startDate
-            if endDate < BEGINNING_OF_ECON:
-            	break	# we've gone too far
-            startDate = endDate - span
-    return price
+	price = 0
+	span = timedelta(hours=6)
+	while price == 0:
+		endDate = startDate
+		startDate = endDate - span
+		xactions = fetchXactions(itemid, startDate, endDate)
+		if len(xactions) > 0:
+			lastXaction = xactions[len(xactions)-1]
+			parts = lastXaction.split(",")
+			price = int(parts[5]) / int(parts[4])
+		else:
+			span = span * 2
+			endDate = startDate
+			if endDate < BEGINNING_OF_ECON:
+				break	# we've gone too far
+			startDate = endDate - span
+	return price
 
 # Translate array of text into array suitable for graphing
 def econXactionsToGraphTable(data, startDate, endDate):
-    result = [ ]
-    dt = startDate
-    incr = (endDate - startDate) / 24   # graph will have 24 columns
-    while dt < endDate:
-        result.append( [dt, 0, 0] )
-        dt = dt + incr
-    i = 0
-    limit = 23
-    for xn in data:
-        details = xn.split(",")
-        dt = datetime.strptime(details[6] + " +0000", "%Y-%m-%d %H:%M:%S %z")
-        while i < limit and dt > result[i+1][0]:
-            i = i + 1
-        result[i][1] += int(details[4])
-        result[i][2] += int(details[5])
-    # Set prices to their average, and compute summary data along the way
-    lastprice = 0
-    volume = 0
-    for i in range(len(result)):
-        if result[i][1] > 0:
-            result[i][2] = round(result[i][2] / result[i][1])
-            lastprice = result[i][2]
-            volume += result[i][1]
-    return (result, volume, lastprice)
+	result = [ ]
+	dt = startDate
+	incr = (endDate - startDate) / 24   # graph will have 24 columns
+	while dt < endDate:
+		result.append( [dt, 0, 0] )
+		dt = dt + incr
+	i = 0
+	limit = 23
+	for xn in data:
+		details = xn.split(",")
+		dt = datetime.strptime(details[6] + " +0000", "%Y-%m-%d %H:%M:%S %z")
+		while i < limit and dt > result[i+1][0]:
+			i = i + 1
+		result[i][1] += int(details[4])
+		result[i][2] += int(details[5])
+	# Set prices to their average, and compute summary data along the way
+	lastprice = 0
+	volume = 0
+	for i in range(len(result)):
+		if result[i][1] > 0:
+			result[i][2] = round(result[i][2] / result[i][1])
+			lastprice = result[i][2]
+			volume += result[i][1]
+	return (result, volume, lastprice)
 
 #
 def graphDataToGraphTable(graphdata, startDate, endDate):
-    datasets = re.findall("<dataset (.*?)</dataset>", graphdata)
-    prices = extractData(datasets[0])
-    volumes = extractData(datasets[1])
-    #dates = re.findall("category name='([^']*)", graphdata)
-    #Let's try using our calculated dates instead
-    dt = startDate
-    delta = (endDate - startDate) / (len(volumes) - 1)
-    result = [ ]
-    volume = 0
-    startprice = round(float(prices[0]))
-    lastprice = startprice
-    for i in range(len(volumes) - 1):
-        vol = int(volumes[i+1])
-        # 6/24/2020: ECON DATA CUT OFF - ignore this "if"
-        if False and dt > KOL_MARKETPLACE_OUTAGE: # Ignore old data after 
-            vol = 0
-        if vol == 0:
-            price = 0
-        else:
-            price = round(float(prices[i+1]))
-        result.append( [ dt, vol, price ] );
-        volume = volume + vol
-        if price >= 100:
-            lastprice = price
-        dt = dt + delta
-    return (result, volume, lastprice, startprice)
+	datasets = re.findall("<dataset (.*?)</dataset>", graphdata)
+	prices = extractData(datasets[0])
+	volumes = extractData(datasets[1])
+	#dates = re.findall("category name='([^']*)", graphdata)
+	#Let's try using our calculated dates instead
+	dt = startDate
+	delta = (endDate - startDate) / (len(volumes) - 1)
+	result = [ ]
+	volume = 0
+	startprice = round(float(prices[0]))
+	lastprice = startprice
+	for i in range(len(volumes) - 1):
+		vol = int(volumes[i+1])
+		# 6/24/2020: ECON DATA CUT OFF - ignore this "if"
+		if False and dt > KOL_MARKETPLACE_OUTAGE: # Ignore old data after 
+			vol = 0
+		if vol == 0:
+			price = 0
+		else:
+			price = round(float(prices[i+1]))
+		result.append( [ dt, vol, price ] );
+		volume = volume + vol
+		if price >= 100:
+			lastprice = price
+		dt = dt + delta
+	return (result, volume, lastprice, startprice)
 
 # Go through the transactions (must be in order) and add them to the appropriate bucket
 # in tbl
 def fillInMissingData(tbl, xactions):
-    limit = len(tbl) - 1
-    lastprice = 0
-    for i in range(len(tbl)):
-        if tbl[i][2] > 100:
-            lastprice = tbl[i][2]
-    i = 0
-    for xn in xactions:
-        details = xn.split(",")
-        dt = datetime.strptime(details[6] + " +0000", "%Y-%m-%d %H:%M:%S %z")
-        while i < limit and dt > tbl[i+1][0]:
-            i = i + 1
-        oldvol = tbl[i][1]
-        oldprice = tbl[i][2]
-        newvol = int(details[4])
-        newaggprice = int(details[5])
-        tbl[i][1] += newvol
-        tbl[i][2] = round((oldvol*oldprice + newaggprice) / (oldvol + newvol))
-        lastprice = newaggprice / newvol
-    volume = 0
-    for i in range(len(tbl)):
-        volume = volume + tbl[i][1]
-    return (tbl, volume, lastprice)    
+	limit = len(tbl) - 1
+	lastprice = 0
+	for i in range(len(tbl)):
+		if tbl[i][2] > 100:
+			lastprice = tbl[i][2]
+	i = 0
+	for xn in xactions:
+		details = xn.split(",")
+		dt = datetime.strptime(details[6] + " +0000", "%Y-%m-%d %H:%M:%S %z")
+		while i < limit and dt > tbl[i+1][0]:
+			i = i + 1
+		oldvol = tbl[i][1]
+		oldprice = tbl[i][2]
+		newvol = int(details[4])
+		newaggprice = int(details[5])
+		tbl[i][1] += newvol
+		tbl[i][2] = round((oldvol*oldprice + newaggprice) / (oldvol + newvol))
+		lastprice = newaggprice / newvol
+	volume = 0
+	for i in range(len(tbl)):
+		volume = volume + tbl[i][1]
+	return (tbl, volume, lastprice)	
 
-    
+	
 def lastPriceChange(xactions):
-    if len(xactions) < 2:
-        return 0
-    xaction1 = xactions[len(xactions)-2].split(",")
-    xaction2 = xactions[len(xactions)-1].split(",")
-    return round( int(xaction2[5])/int(xaction2[4]) - int(xaction1[5])/int(xaction1[4]) )
+	if len(xactions) < 2:
+		return 0
+	xaction1 = xactions[len(xactions)-2].split(",")
+	xaction2 = xactions[len(xactions)-1].split(",")
+	return round( int(xaction2[5])/int(xaction2[4]) - int(xaction1[5])/int(xaction1[4]) )
 
 def transactionLayer(xactions):
-    height = 49 + 12*len(xactions)
-    result = f'<DIV id=layer1 style="visibility:hidden;height:{height}px" >'
-    for xaction in xactions:
-        parts = xaction.split(",")
-        singlePrice = int(parts[5]) / int(parts[4])
-        result = result + parts[4] + " @ " + str(singlePrice) + ", " + parts[6] + "<br>\n"
-    result = result + '<p><p><span id="close"><a href="javascript:setVisible(\'layer1\')">CLOSE</a></span>'
-    result = result + '<br></DIV>\n'
-    return result
-    
+	height = 49 + 12*len(xactions)
+	result = f'<DIV id=layer1 style="visibility:hidden;height:{height}px" >'
+	for xaction in xactions:
+		parts = xaction.split(",")
+		singlePrice = int(parts[5]) / int(parts[4])
+		result = result + parts[4] + " @ " + str(singlePrice) + ", " + parts[6] + "<br>\n"
+	result = result + '<p><p><span id="close"><a href="javascript:setVisible(\'layer1\')">CLOSE</a></span>'
+	result = result + '<br></DIV>\n'
+	return result
+	
 def generateTrend(value):
-    if value > 0:
-        color = 'green'
-        trend = 'greenup'
-    elif value < 0:
-        color = 'red'
-        trend = 'reddown'
-    else:
-        color = 'black'
-        trend = 'nochange'
-    value = round(value)
-    return f'<img src=http://{WIKILOC}/newmarket/newmarket/{trend}.gif> <font color={color}>{value:,}</font>'
-    
+	if value > 0:
+		color = 'green'
+		trend = 'greenup'
+	elif value < 0:
+		color = 'red'
+		trend = 'reddown'
+	else:
+		color = 'black'
+		trend = 'nochange'
+	value = round(value)
+	return f'<img src=http://{WIKILOC}/newmarket/newmarket/{trend}.gif> <font color={color}>{value:,}</font>'
+	
 #########################################################################
 def prepareResponse(event, context):
-    global state
-    # Retrieve parameters
-    state = "processing parameters"
-    params = event['queryStringParameters']
-    if params is None: params = { }
-    # At the very least, we must have itemid and timespan
-    if 'itemid' not in params or params['itemid'] == '':
-        params['itemid'] = '194'    # Mr. A
-    if 'timespan' not in params or params['timespan'] == '':
-        span = '0'    # use specified starttime and endtime
-    else:
-        span = params['timespan']   # use period of time ending now
-    # Compute endDate (rounded to previous half-hour)
-    # Use specified time if provided and not overridden by a timespan
-    # Else use Now
-    if 'endtime' in params and params['endtime'] != '' and span == '0':
-        endDate = datetime.fromtimestamp(int(params['endtime']), tz=timezone.utc)
-    else:
-        endDate = datetime.now(timezone.utc)
-    m = endDate.minute
-    if m >= 30:
-        m = m - 30
-    endDate = endDate - timedelta(seconds=endDate.second, minutes=m)
-    # Compute startDate (defaulting to 1 day before endDate, rounded to previous
-    # half-hour)
-    if 'starttime' in params and params['starttime'] != '':
-        startDate = datetime.fromtimestamp(int(params['starttime']), tz=timezone.utc)
-        m = startDate.minute
-        if m >= 30:
-            m = m - 30
-        startDate = startDate - timedelta(seconds=startDate.second, minutes=m)
-    else:
-        startDate = endDate - timedelta(hours=24)
-    # startDate is either what we were given, or based on endDate and requested 
-    # time span
-    if span == '0':
-        pass    # just use starttime and endtime we were given
-    elif span == '1':
-        startDate = endDate - timedelta(days=1)
-    elif span == '2':
-        startDate = endDate - timedelta(days=7)
-    elif span == '3':
-        startDate = endDate - timedelta(days=30)
-    elif span == '4':
-        startDate = BEGINNING_OF_HISTORY
-    elif span == '5':
-        startDate = endDate - timedelta(hours=12)
-    elif span == '6':
-        startDate = endDate - timedelta(days=2)
-    elif span == '7':
-        startDate = endDate - timedelta(days=14)
-    # Invoke source graph page
-    url = SOURCE
-    delim = "?"
-    for p in params:
-        url = url + delim + p + "=" + params[p].replace(' ', '+') # Q&D urlencode
-        delim = "&"
-    print("URL to open on Coldfront: " + url)
-    state = "reading the Marketplace graph page"
-    noverify = ssl.SSLContext()
-    f = request.urlopen(url, context=noverify) # Remove context=... when cert good
-    b = f.read()
-    b = b.decode("utf-8", "ignore")
-    print("Coldfront page received")
-    # If not a valid ID, just return that text
-    if (b.find('not a valid item ID') >= 0):
-        return b
-    # If span is All History ('4'), get startDate from prevstart parameter
-    if span != '':
-        startre = re.compile('name=prevstart value=([0-9]*)')
-        startexp = startre.search(b)
-        prevstart = startexp.group(1)
-        prevts = datetime.fromtimestamp(int(prevstart), tz=timezone.utc)
-        prevts = prevts - timedelta(hours=8)    # correct time
-        #prevdate = prevts.strftime('%Y-%m-%d %H:%M:%S')
-        #b = b.replace('Timespan:', 'Timespan ' + prevdate + ':')
-        startDate = prevts
-    # Set our display style
-    state = "transforming the Marketplace graph page"
-    b = re.sub('<link [^>]*marketstyle.css[^>]*>', STYLE, b)
-    # Replace original links to source with ours
-    rcon = event['requestContext']
-    thisPage = "https://" + rcon['domainName'] + rcon['path']
-    b = b.replace(SOURCE, thisPage)
-    b = b.replace('greenup.gif', SOURCE_IMG+'greenup.gif')
-    b = b.replace('reddown.gif', SOURCE_IMG+'reddown.gif')
-    b = b.replace('leftarrow.gif', SOURCE_IMG+'leftarrow.gif')
-    b = b.replace('rightarrow.gif', SOURCE_IMG+'rightarrow.gif')
-    b = b.replace('nochange.gif', SOURCE_IMG+'nochange.gif')
-    b = b.replace('translist.php', SOURCE_IMG+'translist.php')
-    b = b.replace('/newmarket/itemgraph.php', rcon['path'])
-    # Tried to replace out-of-line Javascript with inline - no luck
-    b = b.replace(OLD_DATESTYLE, DATESTYLE)
-    b = b.replace(OLD_MOOTOOLS, MOOTOOLS)
-    b = b.replace(OLD_DATEPICKER, DATEPICKER)
-    # It's not "all history", it's just 2 years
-    b = b.replace("View all history", "View last 2 years")
-    # Below is because the Reload Chart button gives us a page that does not have
-    # the <graph> elements where we get our data.  Let's force a full reload.
-    b = b.replace('name=happy', 'name=unhappy')
-    # Fetch <graph> tag and extract data
-    graphre = re.compile('<graph ([^>]*)>(.*)</graph>')
-    graphxml = graphre.search(b)
-    graphattrs = graphxml.group(1)
-    #vmax = float(re.search("PYAxisMaxValue='([^']*)", graphattrs).group(1))
-    #vmax = normalizeVmax(vmax)
-    #pmax = float(re.search("SYAxisMaxValue='([^']*)", graphattrs).group(1))
-    #pmin = float(re.search("SYAxisMinValue='([^']*)", graphattrs).group(1))
-    graphdata = graphxml.group(2)
-    #cmatches = re.findall("category name='([^']*)", graphdata)
-    #for m in cmatches:
-    #    print(m)
-    # Get what data we can from KoL Marketplace's graph
-    tbl, volume, lastprice, startprice = graphDataToGraphTable(graphdata, startDate, endDate)
-    # Take additional steps if timespan includes when Marketplace failed
-    # 6/24/2020: ECON DATA SUPPLY CUT OFF, use 2.0 data
-    if False and endDate > KOL_MARKETPLACE_OUTAGE:
-        itemid = params['itemid']
-        if startDate < KOL_MARKETPLACE_OUTAGE:
-            xactions = fetchXactions(itemid, KOL_MARKETPLACE_OUTAGE, endDate)
-        else:
-            xactions = fetchXactions(itemid, startDate, endDate)
-        tbl, volume, lastprice = fillInMissingData(tbl, xactions)
-        #if startDate >= KOL_MARKETPLACE_OUTAGE:
-        #    econstartprice = priceGoingIn(itemid, startDate)
-        #    if econstartprice > 99:
-        #        startprice = econstartprice
-        b = re.sub('CURRENT AVG PRICE: <font color=dodgerblue>[0-9.,]* meat',
-                   f'CURRENT AVG PRICE: <font color=dodgerblue>{lastprice:,} meat',
-                   b)
-        b = re.sub('BOUGHT THIS TIMESPAN: <font color=dodgerblue>[0-9,]*',
-                   f'BOUGHT THIS TIMESPAN: <font color=dodgerblue>{volume:,}',
-                   b)
-        changehtml = generateTrend(lastPriceChange(xactions))
-        b = re.sub('Latest Price Change: <img [^>]*> <font color=[^>]*>[-,0-9.]*</font>',
-                   f'Latest Price Change: {changehtml}', b)
-        trendhtml = generateTrend(lastprice - startprice)
-        b = re.sub('Timespan Price Trend: <img [^>]*> <font color=[^>]*>[-,0-9.]*</font>',
-                   f'Timespan Price Trend: {trendhtml}', b)
-        b = re.sub('<DIV id=layer1 .*</DIV>', transactionLayer(xactions), b, flags=re.DOTALL)
-    # Determine axes and generate chart
-    pmax = startprice
-    pmin = startprice
-    vmax = 0
-    for i in range(len(tbl)):
-        p = tbl[i][2]
-        if p >= 100:
-            if pmax < p: pmax = p
-            if p < pmin: pmin = p
-        v = tbl[i][1]
-        if vmax < v : vmax = v
-    vmax = normalizeVmax(vmax)
-    b = b.replace('Chart.', generateChart2(startDate, endDate, tbl,
-                                           vmax, pmax, pmin, startprice))
-    b = b.replace('Full Transaction List</a> ]',
-                  'Full Transaction List</a> ]<br/><br/>'
-                  + 'Page adapted for HTML5 by Aventuristo (#3028125)')
-    return b
+	global state
+	# Retrieve parameters
+	state = "processing parameters"
+	params = event['queryStringParameters']
+	if params is None: params = { }
+	# At the very least, we must have itemid and timespan
+	if 'itemid' not in params or params['itemid'] == '':
+		params['itemid'] = '194'	# Mr. A
+	if 'timespan' not in params or params['timespan'] == '':
+		span = '0'	# use specified starttime and endtime
+	else:
+		span = params['timespan']   # use period of time ending now
+	# Compute endDate (rounded to previous half-hour)
+	# Use specified time if provided and not overridden by a timespan
+	# Else use Now
+	if 'endtime' in params and params['endtime'] != '' and span == '0':
+		endDate = datetime.fromtimestamp(int(params['endtime']), tz=timezone.utc)
+	else:
+		endDate = datetime.now(timezone.utc)
+	m = endDate.minute
+	if m >= 30:
+		m = m - 30
+	endDate = endDate - timedelta(seconds=endDate.second, minutes=m)
+	# Compute startDate (defaulting to 1 day before endDate, rounded to previous
+	# half-hour)
+	if 'starttime' in params and params['starttime'] != '':
+		startDate = datetime.fromtimestamp(int(params['starttime']), tz=timezone.utc)
+		m = startDate.minute
+		if m >= 30:
+			m = m - 30
+		startDate = startDate - timedelta(seconds=startDate.second, minutes=m)
+	else:
+		startDate = endDate - timedelta(hours=24)
+	# startDate is either what we were given, or based on endDate and requested 
+	# time span
+	if span == '0':
+		pass	# just use starttime and endtime we were given
+	elif span == '1':
+		startDate = endDate - timedelta(days=1)
+	elif span == '2':
+		startDate = endDate - timedelta(days=7)
+	elif span == '3':
+		startDate = endDate - timedelta(days=30)
+	elif span == '4':
+		startDate = BEGINNING_OF_HISTORY
+	elif span == '5':
+		startDate = endDate - timedelta(hours=12)
+	elif span == '6':
+		startDate = endDate - timedelta(days=2)
+	elif span == '7':
+		startDate = endDate - timedelta(days=14)
+	# Invoke source graph page
+	url = SOURCE
+	delim = "?"
+	for p in params:
+		url = url + delim + p + "=" + params[p].replace(' ', '+') # Q&D urlencode
+		delim = "&"
+	#print("URL to open on Coldfront: " + url)
+	state = "reading the Marketplace graph page"
+	#noverify = ssl.SSLContext()
+	f = request.urlopen(url) # Remove context=... when cert good
+	b = f.read()
+	b = b.decode("utf-8", "ignore")
+	#print("Coldfront page received")
+	# If not a valid ID, just return that text
+	if (b.find('not a valid item ID') >= 0):
+		return b
+	# If span is All History ('4'), get startDate from prevstart parameter
+	if span != '':
+		startre = re.compile('name=prevstart value=([0-9]*)')
+		startexp = startre.search(b)
+		prevstart = startexp.group(1)
+		prevts = datetime.fromtimestamp(int(prevstart), tz=timezone.utc)
+		prevts = prevts - timedelta(hours=8)	# correct time
+		#prevdate = prevts.strftime('%Y-%m-%d %H:%M:%S')
+		#b = b.replace('Timespan:', 'Timespan ' + prevdate + ':')
+		startDate = prevts
+	# Set our display style
+	state = "transforming the Marketplace graph page"
+	b = re.sub('<link [^>]*marketstyle.css[^>]*>', STYLE, b)
+	# Replace original links to source with ours
+	rcon = event['requestContext']
+	thisPage = "https://" + rcon['domainName'] + rcon['path']
+	b = b.replace(SOURCE, thisPage)
+	b = b.replace('greenup.gif', SOURCE_IMG+'greenup.gif')
+	b = b.replace('reddown.gif', SOURCE_IMG+'reddown.gif')
+	b = b.replace('leftarrow.gif', SOURCE_IMG+'leftarrow.gif')
+	b = b.replace('rightarrow.gif', SOURCE_IMG+'rightarrow.gif')
+	b = b.replace('nochange.gif', SOURCE_IMG+'nochange.gif')
+	b = b.replace('translist.php', SOURCE_IMG+'translist.php')
+	b = b.replace('/newmarket/itemgraph.php', rcon['path'])
+	# Tried to replace out-of-line Javascript with inline - no luck
+	b = b.replace(OLD_DATESTYLE, DATESTYLE)
+	b = b.replace(OLD_MOOTOOLS, MOOTOOLS)
+	b = b.replace(OLD_DATEPICKER, DATEPICKER)
+	# It's not "all history", it's just 2 years
+	b = b.replace("View all history", "View last 2 years")
+	# Below is because the Reload Chart button gives us a page that does not have
+	# the <graph> elements where we get our data.  Let's force a full reload.
+	b = b.replace('name=happy', 'name=unhappy')
+	# Fetch <graph> tag and extract data
+	graphre = re.compile('<graph ([^>]*)>(.*)</graph>')
+	graphxml = graphre.search(b)
+	graphattrs = graphxml.group(1)
+	#vmax = float(re.search("PYAxisMaxValue='([^']*)", graphattrs).group(1))
+	#vmax = normalizeVmax(vmax)
+	#pmax = float(re.search("SYAxisMaxValue='([^']*)", graphattrs).group(1))
+	#pmin = float(re.search("SYAxisMinValue='([^']*)", graphattrs).group(1))
+	graphdata = graphxml.group(2)
+	#cmatches = re.findall("category name='([^']*)", graphdata)
+	#for m in cmatches:
+	#	print(m)
+	# Get what data we can from KoL Marketplace's graph
+	tbl, volume, lastprice, startprice = graphDataToGraphTable(graphdata, startDate, endDate)
+	# Take additional steps if timespan includes when Marketplace failed
+	# 6/24/2020: ECON DATA SUPPLY CUT OFF, use 2.0 data
+	if False and endDate > KOL_MARKETPLACE_OUTAGE:
+		itemid = params['itemid']
+		if startDate < KOL_MARKETPLACE_OUTAGE:
+			xactions = fetchXactions(itemid, KOL_MARKETPLACE_OUTAGE, endDate)
+		else:
+			xactions = fetchXactions(itemid, startDate, endDate)
+		tbl, volume, lastprice = fillInMissingData(tbl, xactions)
+		#if startDate >= KOL_MARKETPLACE_OUTAGE:
+		#	econstartprice = priceGoingIn(itemid, startDate)
+		#	if econstartprice > 99:
+		#		startprice = econstartprice
+		b = re.sub('CURRENT AVG PRICE: <font color=dodgerblue>[0-9.,]* meat',
+				   f'CURRENT AVG PRICE: <font color=dodgerblue>{lastprice:,} meat',
+				   b)
+		b = re.sub('BOUGHT THIS TIMESPAN: <font color=dodgerblue>[0-9,]*',
+				   f'BOUGHT THIS TIMESPAN: <font color=dodgerblue>{volume:,}',
+				   b)
+		changehtml = generateTrend(lastPriceChange(xactions))
+		b = re.sub('Latest Price Change: <img [^>]*> <font color=[^>]*>[-,0-9.]*</font>',
+				   f'Latest Price Change: {changehtml}', b)
+		trendhtml = generateTrend(lastprice - startprice)
+		b = re.sub('Timespan Price Trend: <img [^>]*> <font color=[^>]*>[-,0-9.]*</font>',
+				   f'Timespan Price Trend: {trendhtml}', b)
+		b = re.sub('<DIV id=layer1 .*</DIV>', transactionLayer(xactions), b, flags=re.DOTALL)
+	# Determine axes and generate chart
+	pmax = startprice
+	pmin = startprice
+	vmax = 0
+	for i in range(len(tbl)):
+		p = tbl[i][2]
+		if p >= 100:
+			if pmax < p: pmax = p
+			if p < pmin: pmin = p
+		v = tbl[i][1]
+		if vmax < v : vmax = v
+	vmax = normalizeVmax(vmax)
+	b = b.replace('Chart.', generateChart2(startDate, endDate, tbl,
+										   vmax, pmax, pmin, startprice))
+	b = b.replace('Full Transaction List</a> ]',
+				  'Full Transaction List</a> ]<br/><br/>'
+				  + 'Page adapted for HTML5 by Aventuristo (#3028125)')
+	# Correct the item name, if necessary
+	korektoj = corrected_options()
+	i = int(params['itemid'])
+	if i in korektoj:
+		goodname = korektoj[i]
+		good_name = goodname.replace(' ', '_')
+		lnk = re.compile('thekolwiki/index.php/[^ ]* target=.wiki.>.*?</a>')
+		b = lnk.sub(f'thekolwiki/index.php/{good_name} target="wiki">{goodname}</a>', b)
+	return b
 
 
 def respond(err, res=None):
-    return {
-        'statusCode': '400' if err else '200',
-        'body': err.message if err else res,
-        'headers': {
-            'Content-Type': 'text/html',
-        },
-    }
+	return {
+		'statusCode': '400' if err else '200',
+		'body': err.message if err else res,
+		'headers': {
+			'Content-Type': 'text/html',
+		},
+	}
 
 state = "I was screwing around with the page"
 
 def exceptionInfo(trace, event):
-    result = trace.replace("\n", "<br/>")
-    print(trace)
-    params = event['queryStringParameters']
-    if params is None: 
-        result = result + "== No parameters ==<br/>"
-    else:
-        result = result + "== Parameters ==<br/>"
-        for p in params:
-            v = params[p]
-            result = result + f"{p}: {v}</br>"
-    return result
+	result = trace.replace("\n", "<br/>")
+	print(trace)
+	params = event['queryStringParameters']
+	if params is None: 
+		result = result + "== No parameters ==<br/>"
+	else:
+		result = result + "== Parameters ==<br/>"
+		for p in params:
+			v = params[p]
+			result = result + f"{p}: {v}</br>"
+	return result
 
 timeoutResponse = '''
 <html><head></head>
@@ -1845,44 +1880,72 @@ timeoutResponse = '''
 '''
 
 class MyTimeout(BaseException):
-    pass
+	pass
 
 def timeout_handler(_signal, _frame):
-    raise MyTimeout("Time exceeded")
-    
+	raise MyTimeout("Time exceeded")
+	
 def lambda_handler(event, context):
-    '''Demonstrates a simple HTTP endpoint using API Gateway. You have full
-    access to the request and response payload, including headers and
-    status code.
+	'''Demonstrates a simple HTTP endpoint using API Gateway. You have full
+	access to the request and response payload, including headers and
+	status code.
 
-    This visits a KoL Marketplace search page and relays its content to the caller.
-    '''
-    logger.info("## HANDLE LAMBDA")
-    if 'source' in event and event['source'] == 'aws.events':
-        return respond(None, 'Ping acknowledged')
-    
-    operation = event['httpMethod']
-    if operation == 'GET':
-        html = ""
-        try:
-            signal.signal(signal.SIGALRM, timeout_handler)
-            when = math.floor(context.get_remaining_time_in_millis() / 1000) - 1
-            signal.alarm(when)
-            html = prepareResponse(event, context)
-        except MyTimeout as e:
-            logger.info("## TIMEOUT HANDLED")
-            html = timeoutResponse.format(state)
-        except Exception as e:
-            logger.info("## OTHER EXCEPTION " + traceback.format_exc())
-            html = exceptionInfo(traceback.format_exc(), event)
-        finally:
-            signal.alarm(0)
-            return respond(None, html)
-    else:
-        return respond(ValueError('Unsupported method "{}"'.format(operation)))
+	This visits a KoL Marketplace search page and relays its content to the caller.
+	'''
+	logger.info("## HANDLE LAMBDA")
+	if 'source' in event and event['source'] == 'aws.events':
+		return respond(None, 'Ping acknowledged')
+	
+	operation = event['httpMethod']
+	if operation == 'GET':
+		html = ""
+		try:
+			signal.signal(signal.SIGALRM, timeout_handler)
+			when = math.floor(context.get_remaining_time_in_millis() / 1000) - 1
+			signal.alarm(when)
+			html = prepareResponse(event, context)
+		except MyTimeout as e:
+			logger.info("## TIMEOUT HANDLED")
+			html = timeoutResponse.format(state)
+		except Exception as e:
+			logger.info("## OTHER EXCEPTION " + traceback.format_exc())
+			html = exceptionInfo(traceback.format_exc(), event)
+		finally:
+			signal.alarm(0)
+			return respond(None, html)
+	else:
+		return respond(ValueError('Unsupported method "{}"'.format(operation)))
 
 
 # Code for local testing - remove from AWS version
 class FakeContext:
-    def get_remaining_time_in_millis(self):
-        return 300000
+	def get_remaining_time_in_millis(self):
+		return 300000
+
+if not on_aws():
+	import sys
+	import urllib.parse
+	my_event = { }
+	my_event['httpMethod'] = 'GET'
+	my_event['queryStringParameters'] = { }
+	if len(sys.argv) > 1: 
+		# command line - just care about itemid
+		my_event['queryStringParameters']['itemid'] = sys.argv[1]
+		my_event['queryStringParameters']['timespan'] = '1'
+		my_event['queryStringParameters']['noanim'] = '1'
+	else:
+		# web cgi
+		method = os.environ['REQUEST_METHOD']
+		if method == 'GET':
+			qs = urllib.parse.parse_qs(os.environ['QUERY_STRING'])
+		for q in qs:
+			my_event['queryStringParameters'][q] = qs[q][0]
+	my_event['requestContext'] = { }
+	my_event['requestContext']['domainName'] = 'fedora2'
+	my_event['requestContext']['path'] = '/right.here/'
+	response = lambda_handler(my_event, FakeContext())
+	print(f'Content-Type: {response["headers"]["Content-Type"]}')
+	print()
+	print(response['body'])
+	
+
