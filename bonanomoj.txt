@@ -1,0 +1,271 @@
+68	Pasta of Peril	Pasta Spoon of Peril	Pasta Spoon of Peril
+157	E-Z Cook Oven&trade;	Dramatic&trade; range	Dramatic&trade; range
+236	cocktailcrafting kit	Queue Du Coq cocktailcrafting kit	Queue Du Coq cocktailcrafting kit
+241	homoerotic frat-paddle	Orcish frat-paddle	Orcish frat-paddle
+426	potion of temporary gr8tness	potion of temporary gr8ness	potion of temporary gr8ness
+813	Knob sausage chow mein	Knob stuffed shells	Knob stuffed shells
+814	bat wing chow mein	b&auml;tzle	b&auml;tzle
+815	rat appendix chow mein	ratini	ratini
+816	tofu chow mein	Knob stroganoff	Knob stroganoff
+817	pr0n chow mein	menudo ravioli	menudo ravioli
+1154	Breathetastic&trade; Premium Canned...	Breathetastic&trade; Premium Canned Air	Breathetastic&trade; Premium Canned Air
+1481	junk-mail pants	union scalemail pants	union scalemail pants
+1493	ridiculously overelaborate ninja we...	ridiculously overelaborate ninja weapon	ridiculously overelaborate ninja weapon
+1498	McPhee's Grimoire of Hilarious Obje...	McPhee's Grimoire of Hilarious Object...	McPhee's Grimoire of Hilarious Object Summoning
+1637	phial of hotness	lotion of hotness	lotion of hotness
+1638	phial of coldness	lotion of coldness	lotion of coldness
+1639	phial of spookiness	lotion of spookiness	lotion of spookiness
+1640	phial of stench	lotion of stench	lotion of stench
+1641	phial of sleaziness	lotion of sleaziness	lotion of sleaziness
+1704	roofie	shingle	shingle
+1734	sword behind inappropriate preposit...	sword behind inappropriate prepositions	sword behind inappropriate prepositions
+1960	scroll of ancient forbidden unspeak...	scroll of ancient forbidden unspeakab...	scroll of ancient forbidden unspeakable evil
+2000	Das &Uuml;berk&uuml;hlraum trading ...	Das &Uuml;berk&uuml;hlraum trading card	Das &Uuml;berk&uuml;hlraum trading card
+2043	macrame net	hemp net	hemp net
+2128	vampire cape	vampire collar	vampire collar
+2209	Crimbo ukelele	Crimbo ukulele	Crimbo ukulele
+2336	lead pipe	oversized pipe	oversized pipe
+2528	filet of tangy gnat (&quot;fotelif&...	filet of tangy gnat (&quot;fotelif&quot;)	filet of tangy gnat (&quot;fotelif&quot;)
+2585	Colonel Mustard's Lonely Spades Clu...	Colonel Mustard's Lonely Spades Club ...	Colonel Mustard's Lonely Spades Club Jacket
+2586	General Sage's Lonely Diamonds Club...	General Sage's Lonely Diamonds Club J...	General Sage's Lonely Diamonds Club Jacket
+2587	Corporal Fennel's Lonely Clubs Club...	Corporal Fennel's Lonely Clubs Club J...	Corporal Fennel's Lonely Clubs Club Jacket
+2588	Private Pepper's Lonely Hearts Club...	Private Pepper's Lonely Hearts Club J...	Private Pepper's Lonely Hearts Club Jacket
+2896	tiny plastic filthy hippy jewelry m...	tiny plastic filthy hippy jewelry maker	tiny plastic filthy hippy jewelry maker
+2898	tiny plastic fiendish can of aspara...	tiny plastic fiendish can of asparagus	tiny plastic fiendish can of asparagus
+2903	tiny plastic Knob Goblin mad scient...	tiny plastic Knob Goblin mad scientist	tiny plastic Knob Goblin mad scientist
+2949	jar of &quot;Creole Lady&quot; marr...	jar of &quot;Creole Lady&quot; marrrmalade	jar of &quot;Creole Lady&quot; marrrmalade
+3194	origami &quot;gentlemen's&quot; mag...	origami &quot;gentlemen's&quot; magazine	origami &quot;gentlemen's&quot; magazine
+3239	Maxing	Maxing, Relaxing	Maxing, Relaxing
+3240	Biddy Cracker's Old-Fashioned Cookb...	Biddy Cracker's Old-Fashioned Cookbook	Biddy Cracker's Old-Fashioned Cookbook
+3263	Sp'n-Zor's Grimoire of &quot;Tastef...	Sp'n-Zor's Grimoire of &quot;Tasteful&quot; Gifts	Sp'n-Zor's Grimoire of &quot;Tasteful&quot; Gifts
+3412	Hodgman's journal #1:  The Lean Times	Hodgman's journal #1: The Lean Times	Hodgman's journal #1: The Lean Times
+3413	Hodgman's journal #2:  Entrepreneur...	Hodgman's journal #2: Entrepreneuryth...	Hodgman's journal #2: Entrepreneurythmics
+3414	Hodgman's journal #3:  Pumping Tin	Hodgman's journal #3: Pumping Tin	Hodgman's journal #3: Pumping Tin
+3415	Hodgman's journal #4:  View From Th...	Hodgman's journal #4: View From The B...	Hodgman's journal #4: View From The Big Top
+3536	plans for depleted Grimacite gravy ...	plans for depleted Grimacite gravy boat	plans for depleted Grimacite gravy boat
+3537	plans for depleted Grimacite weight...	plans for depleted Grimacite weightli...	plans for depleted Grimacite weightlifting belt
+3538	plans for depleted Grimacite grappl...	plans for depleted Grimacite grapplin...	plans for depleted Grimacite grappling hook
+3539	plans for depleted Grimacite ninja ...	plans for depleted Grimacite ninja mask	plans for depleted Grimacite ninja mask
+3540	plans for depleted Grimacite shingu...	plans for depleted Grimacite shinguards	plans for depleted Grimacite shinguards
+3541	plans for depleted Grimacite astrol...	plans for depleted Grimacite astrolabe	plans for depleted Grimacite astrolabe
+3660	tiny plastic chunk of depleted Grim...	tiny plastic chunk of depleted Grimacite	tiny plastic chunk of depleted Grimacite
+3783	bottle of extra-strength melodramam...	bottle of extra-strength melodramamine	bottle of extra-strength melodramamine
+4410	The Autobiography Of Dynamite Super...	The Autobiography Of Dynamite Superma...	The Autobiography Of Dynamite Superman Jones
+4433	irresistibillity potion	irresistibility potion	irresistibility potion
+4497	recording of The Ballad of Richie T...	recording of The Ballad of Richie Thi...	recording of The Ballad of Richie Thingfinder
+4498	recording of Benetton's Medley of D...	recording of Benetton's Medley of Div...	recording of Benetton's Medley of Diversity
+4503	recording of Inigo's Incantation of...	recording of Inigo's Incantation of I...	recording of Inigo's Incantation of Inspiration
+4577	bugged b&Atilde;&para;n&plusmn;&Ati...	bugged b&Atilde;&para;n&plusmn;&Atilde;&copy;t	bugged b&Atilde;&para;n&plusmn;&Atilde;&copy;t
+4579	Knob G&Atilde;&para;blin l&Atilde;&...	Knob G&Atilde;&para;blin l&Atilde;&sup2;ve potion	Knob G&Atilde;&para;blin l&Atilde;&sup2;ve potion
+4580	old school Mafi<i>a kni</i>cke&frac...	old school Mafi<i>a kni</i>cke&frac12;&aelig;	old school Mafi<i>a kni</i>cke&frac12;&aelig;
+4581	T&Icirc;&curren;&loz;lisman of Bai&...	T&Icirc;&curren;&loz;lisman of Bai&oslash;&Dagger;	T&Icirc;&curren;&loz;lisman of Bai&oslash;&Dagger;
+4712	GameInformPowerDailyPro subscriptio...	GameInformPowerDailyPro subscription ...	GameInformPowerDailyPro subscription card
+4829	robot reindeer protocol P.R.A.N.C.E...	robot reindeer protocol P.R.A.N.C.E.R.	robot reindeer protocol P.R.A.N.C.E.R.
+4836	robot reindeer protocol B.L.I.T.Z.E...	robot reindeer protocol B.L.I.T.Z.E.N.	robot reindeer protocol B.L.I.T.Z.E.N.
+4837	robot reindeer protocol R.U.D.O.L.P...	robot reindeer protocol R.U.D.O.L.P.H.	robot reindeer protocol R.U.D.O.L.P.H.
+5125	Notes from the Elfpocalypse	Notes from the Elfpocalypse, Chapter I	Notes from the Elfpocalypse, Chapter I
+5126	Notes from the Elfpocalypse	Notes from the Elfpocalypse, Chapter II	Notes from the Elfpocalypse, Chapter II
+5127	Notes from the Elfpocalypse	Notes from the Elfpocalypse, Chapter III	Notes from the Elfpocalypse, Chapter III
+5128	Notes from the Elfpocalypse	Notes from the Elfpocalypse, Chapter IV	Notes from the Elfpocalypse, Chapter IV
+5129	Notes from the Elfpocalypse	Notes from the Elfpocalypse, Chapter V	Notes from the Elfpocalypse, Chapter V
+5130	Notes from the Elfpocalypse	Notes from the Elfpocalypse, Chapter VI	Notes from the Elfpocalypse, Chapter VI
+5268	holy bomb	holy bomb, batman	holy bomb, batman
+5403	Mint Salton Pepper's Peppermint See...	Mint Salton Pepper's Peppermint Seed ...	Mint Salton Pepper's Peppermint Seed Catalog
+5409	Feliz Navidad	Tequiz Navidad	Tequiz Navidad
+5464	resolution:  be wealthier	resolution: be wealthier	resolution: be wealthier
+5508	Uncle Greenspan's Bathroom Finance ...	Uncle Greenspan's Bathroom Finance Guide	Uncle Greenspan's Bathroom Finance Guide
+5511	Trivial Avocations Card:  What?	Trivial Avocations Card: What?	Trivial Avocations Card: What?
+5512	Trivial Avocations Card:  When?	Trivial Avocations Card: When?	Trivial Avocations Card: When?
+5513	Trivial Avocations Card:  Who?	Trivial Avocations Card: Who?	Trivial Avocations Card: Who?
+5514	Trivial Avocations Card:  Where?	Trivial Avocations Card: Where?	Trivial Avocations Card: Where?
+5546	The Thorax's Codex of Tormenting Pl...	The Thorax's Codex of Tormenting Plants	The Thorax's Codex of Tormenting Plants
+5586	Aye Aye	Aye Aye, Captain	Aye Aye, Captain
+5587	Aye Aye	Aye Aye, Tooth Tooth	Aye Aye, Tooth Tooth
+5590	Oh	Oh, the Humanitini	Oh, the Humanitini
+5591	Great Old Fashioned	Great Older Fashioned	Great Older Fashioned
+5602	Earth	Earth, Wind and Firewater	Earth, Wind and Firewater
+5627	Herring Daquiri	Herring Daiquiri	Herring Daiquiri
+5657	fettucini &eacute;pines Inconnu rec...	fettucini &eacute;pines Inconnu recipe	fettucini &eacute;pines Inconnu recipe
+5722	fire hose	FDKOL fire hose	FDKOL fire hose
+5736	Drizzlers Black Licorice	Drizzlers&trade; Black Licorice	Drizzlers&trade; Black Licorice
+5781	soft green echo eyedrop antidote ma...	soft green echo eyedrop antidote martini	soft green echo eyedrop antidote martini
+5804	Shivering Ch&egrave;vre 	Shivering Ch&egrave;vre	Shivering Ch&egrave;vre
+5806	enchanted meusli	enchanted muesli	enchanted muesli
+5879	Pete & Jackie's Dragon Tooth Empori...	Pete &amp; Jackie's Dragon Tooth Emporium...	Pete & Jackie's Dragon Tooth Emporium Catalog
+5894	Red Book	Little Crimson Book	Little Crimson Book
+5898	jar of psychoses (The Suspicious-Lo...	jar of psychoses (The Suspicious-Look...	jar of psychoses (The Suspicious-Looking Guy)
+5899	jar of psychoses (The Captain of th...	jar of psychoses (The Captain of the ...	jar of psychoses (The Captain of the Gourd)
+5900	jar of psychoses (The Crackpot Myst...	jar of psychoses (The Crackpot Mystic)	jar of psychoses (The Crackpot Mystic)
+5902	jar of psychoses (The Pretentious A...	jar of psychoses (The Pretentious Art...	jar of psychoses (The Pretentious Artist)
+5918	Tiny Plastic Animelf	tiny plastic animelf	tiny plastic animelf
+5919	Tiny Plastic ChibiBuddy&trade;	tiny plastic ChibiBuddy&trade;	tiny plastic ChibiBuddy&trade;
+5952	tiny plastic Ancient Unspeakable Bu...	tiny plastic Ancient Unspeakable Bugbear	tiny plastic Ancient Unspeakable Bugbear
+5959	tiny plastic Charity the Zombie Hun...	tiny plastic Charity the Zombie Hunter	tiny plastic Charity the Zombie Hunter
+5961	tiny plastic Hank North	tiny plastic Hank North, Photojournalist	tiny plastic Hank North, Photojournalist
+6010	logging axe	logging hatchet	logging hatchet
+6053	Taco Dan's Taco Stand's Chimichanga...	Taco Dan's Taco Stand Chimichangarita	Taco Dan's Taco Stand Chimichangarita
+6054	Taco Dan's Taco Stand's Chillacious...	Taco Dan's Taco Stand Chillacious Churro	Taco Dan's Taco Stand Chillacious Churro
+6079	old-school calculator watch	old school calculator watch	old school calculator watch
+6107	Artist's  Cr&egrave;me Brul&eacute;...	Artist's Cr&egrave;me Brul&eacute;e Torch of Fury	Artist's Cr&egrave;me Brul&eacute;e Torch of Fury
+6109	bubble-wrap simulator (one broken b...	bubble-wrap simulator (one broken but...	bubble-wrap simulator (one broken button)
+6111	bubble-wrap simulator (one button l...	bubble-wrap simulator (one button left)	bubble-wrap simulator (one button left)
+6149	MiniMechaElf Laser Punch Missile La...	MiniMechaElf Laser Punch Missile Laun...	MiniMechaElf Laser Punch Missile Launcher
+6715	blood-pressure cuff	sphygmomanometer	sphygmomanometer
+6871	old-school beer pull tab	old school beer pull tab	old school beer pull tab
+6893	freezer-burned frost-bitten tortell...	freezer-burned frost-bitten tortellini	freezer-burned frost-bitten tortellini
+6988	tiny die-cast death ray in a pear t...	tiny die-cast death ray in a pear tree	tiny die-cast death ray in a pear tree
+7010	Irish Coffee	Irish Coffee, English Heart	Irish Coffee, English Heart
+7025	Ouija Board	Ouija Board, Ouija Board	Ouija Board, Ouija Board
+7043	warbear sequential gaiety distribut...	warbear sequential gaiety distributio...	warbear sequential gaiety distribution system
+7051	recording of Rolando's Rondo of Res...	recording of Rolando's Rondo of Resisto	recording of Rolando's Rondo of Resisto
+7067	single of Inigo's Incantation of In...	single of Inigo's Incantation of Insp...	single of Inigo's Incantation of Inspiration
+7069	Discontent&trade; Winter Garden Cat...	Discontent&trade; Winter Garden Catalog	Discontent&trade; Winter Garden Catalog
+7090		En Una Fila Tequila	En Una Fila Tequila
+7236	red hot poker	red-hot poker	red-hot poker
+7354	red hot boilermaker	red-hot boilermaker	red-hot boilermaker
+7406	Steam Card: Dungeon Fist (1)	Steam Card: Dungeon Fist (#1)	Steam Card: Dungeon Fist (#1)
+7407	Steam Card: Dungeon Fist (2)	Steam Card: Dungeon Fist (#2)	Steam Card: Dungeon Fist (#2)
+7413	Steam Card: Meteoid (2)	Steam Card: Meteoid (#2)	Steam Card: Meteoid (#2)
+7415	Steam Card: DemonStar (1)	Steam Card: DemonStar (#1)	Steam Card: DemonStar (#1)
+7418	Steam Card: Jackass Plumber (1)	Steam Card: Jackass Plumber (#1)	Steam Card: Jackass Plumber (#1)
+7420	Steam Card: Jackass Plumber (3)	Steam Card: Jackass Plumber (#3)	Steam Card: Jackass Plumber (#3)
+7452	Taco Dan's Super Taco-Riffic Taco S...	Taco Dan's Super Taco-Riffic Taco Sauce!	Taco Dan's Super Taco-Riffic Taco Sauce!
+7458	History's Most Offensive Jokes	History's Most Offensive Jokes, Vol. IX	History's Most Offensive Jokes, Vol. IX
+7460	Sloppy Seconds Diner Employee Handb...	Sloppy Seconds Diner Employee Handbook	Sloppy Seconds Diner Employee Handbook
+7482	Rompeadores de Fantasmas	Rompedores de Fantasmas	Rompedores de Fantasmas
+7528	government-issued night-vision gogg...	government-issued night-vision goggles	government-issued night-vision goggles
+7570	[consumable drop from [Twitch monst...	Friendliness Beverage	Friendliness Beverage
+7571	[gear drop from [Twitch monster #1]]	silent pea shooter	silent pea shooter
+7573	[gear drop from [Twitch monster #2]]	kiwi beak	kiwi beak
+7575	[gear drop from [Twitch monster #3]]	droll monocle	droll monocle
+7576	[twitch belt consumable 1]	future drug: Muscularactum	future drug: Muscularactum
+7578	[twitch belt consumable 3]	future drug: Coolscaline	future drug: Coolscaline
+7604	artisinal hand-squeezed wheatgrass ...	artisanal hand-squeezed wheatgrass juice	artisanal hand-squeezed wheatgrass juice
+7672	[hollow penguin cane]	law-abiding citizen cane	law-abiding citizen cane
+7673	[fancy cocktail]	legitimate business on the beach	legitimate business on the beach
+7674	[hep waders]	hep waders	hep waders
+7678	[fez]	4-dimensional fez	4-dimensional fez
+7679	[drop #2 from [Moonster 1]]	throwing candy	throwing candy
+7681	[drop #2 from [Moonster 2]]	unquiet spirits	unquiet spirits
+7683	[banjoccultist potion]	blue grass	blue grass
+7713	[drop #1 (consumable) from Twitch-v...	Strix stix	Strix stix
+7714	[gear drop from Cheap Strix]	vampire pellet	vampire pellet
+7715	[consumable drop #1 from Twitch-vot...	non-aged vinegar	non-aged vinegar
+7716	[gear drop from hypocritical medicus]	unsanitized scalpel	unsanitized scalpel
+7717	[Gladiator shirt]	gladiator tunica	gladiator tunica
+7721	[salt wages]	salt wages	salt wages
+7742	Xiblaxian encrypted political priso...	Xiblaxian encrypted political prisoner	Xiblaxian encrypted political prisoner
+7743	Xiblaxian holo-schematic: stealth c...	Xiblaxian holo-schematic: stealth cowl	Xiblaxian holo-schematic: stealth cowl
+7744	Xiblaxian holo-schematic: stealth t...	Xiblaxian holo-schematic: stealth tro...	Xiblaxian holo-schematic: stealth trousers
+7745	Xiblaxian holo-schematic: stealth v...	Xiblaxian holo-schematic: stealth vest	Xiblaxian holo-schematic: stealth vest
+7746	Xiblaxian holo-schematic: ultraburr...	Xiblaxian holo-schematic: ultraburrito	Xiblaxian holo-schematic: ultraburrito
+7747	Xiblaxian holo-schematic: space whi...	Xiblaxian holo-schematic: space whiskey	Xiblaxian holo-schematic: space whiskey
+7748	Xiblaxian holo-schematic: residence...	Xiblaxian holo-schematic: residence cube	Xiblaxian holo-schematic: residence cube
+7749	Xiblaxian holo-schematic: xeno-gogg...	Xiblaxian holo-schematic: xeno-goggles	Xiblaxian holo-schematic: xeno-goggles
+7803	Merc Core Field Manual: Sanity Main...	Merc Core Field Manual: Sanity Mainte...	Merc Core Field Manual: Sanity Maintenance
+7804	Merc Core Field Manual: Intimidatio...	Merc Core Field Manual: Intimidation ...	Merc Core Field Manual: Intimidation Techniques
+7852	tiny plastic semi-autonomous drill ...	tiny plastic semi-autonomous drill unit	tiny plastic semi-autonomous drill unit
+7874	Crimbot schematic: Refrigerator Cha...	Crimbot schematic: Refrigerator Chassis	Crimbot schematic: Refrigerator Chassis
+7890	Crimbot schematic: Grease / Regular...	Crimbot schematic: Grease / Regular Gun	Crimbot schematic: Grease / Regular Gun
+7941	[sleeve deuce]	sleeve deuce	sleeve deuce
+7942	[pocket ace]	pocket ace	pocket ace
+7943	[drop #1 from animated spittoon (co...	nastygeist	nastygeist
+7944	[drop #2 from animated spittoon (ra...	gold tooth	gold tooth
+7945	[drop #1 from outlaw behind a table...	portable table	portable table
+7946	[drop #2 from outlaw behind a table...	outlaw bandana	outlaw bandana
+7947	[drop #1 from craggy bartender (boo...	whiskey in a broken glass	whiskey in a broken glass
+7948	[drop #2 from craggy bartender (boo...	shot of mescal	shot of mescal
+7949	[drop #3 from craggy bartender (boo...	glass of herbal tequila	glass of herbal tequila
+7950	[drop #1 from tetched prospector (m...	minin' dynamite	minin' dynamite
+7951	[drop #1 from cowskeleton (hat)]	plaid cowboy hat	plaid cowboy hat
+7952	[drop #2 from cowskeleton (lasso)]	spooky lasso	spooky lasso
+7953	[drop #3 from cowskeleton (gun club)]	rusted-out shootin' iron	rusted-out shootin' iron
+7954	[drop #1 from nest of rattlers (com...	rattler rattle	rattler rattle
+8012		Crimbomega drive chain	Crimbomega drive chain
+8253	Scratch-and-Sniff Guide to Dinseyla...	Scratch-and-Sniff Guide to Dinseyland...	Scratch-and-Sniff Guide to Dinseylandfill
+8254	Trash	Trash, a Memoir	Trash, a Memoir
+8424	1	1,970 carat gold	1,970 carat gold
+8557		The Emperor's new cookie	The Emperor's new cookie
+8560		Aerheads	Aerheads
+8561		Wrotz	Wrotz
+8687	The Fun-Guy Cold Weather Bartender'...	The Fun-Guy Cold Weather Bartender's ...	The Fun-Guy Cold Weather Bartender's Guide
+8704	training scroll:  Shivering Monkey ...	training scroll:  Shivering Monkey Te...	training scroll:  Shivering Monkey Technique
+8758	tiny plastic spoiler	tiny plastic Gaia'ajh-dsli Ak'lwej	tiny plastic Gaia'ajh-dsli Ak'lwej
+8759	tiny plastic also a spoiler 	tiny plastic Crimborgatron	tiny plastic Crimborgatron
+8760	tiny plastic yes also a spoiler	tiny plastic Crimbodhisattva	tiny plastic Crimbodhisattva
+8790		elven tambourine	elven tambourine
+8791		reindeer sickle	reindeer sickle
+8824	The Inquisitor's unidentifiable obj...	The Inquisitor's unidentifiable object	The Inquisitor's unidentifiable object
+8838		exploding gum	exploding gum
+8878	plate of Mixed Garbanzos and Chickp...	plate of Mixed Garbanzos and Chickpeas	plate of Mixed Garbanzos and Chickpeas
+8882	plate of Trader Olaf's Exotic Stink...	plate of Trader Olaf's Exotic Stinkbeans	plate of Trader Olaf's Exotic Stinkbeans
+8883	plate of Pork 'n' Pork 'n' Pork 'n'...	plate of Pork 'n' Pork 'n' Pork 'n' B...	plate of Pork 'n' Pork 'n' Pork 'n' Beans
+9121	Memory Disk	Memory Disk, Alpha	Memory Disk, Alpha
+9122	Tea	Tea, Earl Grey, Hot	Tea, Earl Grey, Hot
+9182	Eldritch Intellect: Journey into a ...	Eldritch Intellect: Journey into a Mi...	Eldritch Intellect: Journey into a Mind of Horror
+9201	Just a lump of inert eldritch matter	lump of not really wriggling eldritch...	lump of not really wriggling eldritch matter
+9258	My Life of Crime	My Life of Crime, a Memoir	My Life of Crime, a Memoir
+9463	Space Baby childrens' book	Space Baby children's book	Space Baby children's book
+9476		Spant eggs	Spant eggs
+9479	Daily Affirmation: Always be Collec...	Daily Affirmation: Always be Collecting	Daily Affirmation: Always be Collecting
+9481	Daily Affirmation: Be Superficially...	Daily Affirmation: Be Superficially i...	Daily Affirmation: Be Superficially interested
+9482	Daily Affirmation: Adapt to Change ...	Daily Affirmation: Adapt to Change Ev...	Daily Affirmation: Adapt to Change Eventually
+9484	Daily Affirmation: Work For Hours a...	Daily Affirmation: Work For Hours a Week	Daily Affirmation: Work For Hours a Week
+9485	Daily Affirmation: Keep Free Hate i...	Daily Affirmation: Keep Free Hate in ...	Daily Affirmation: Keep Free Hate in your Heart
+9530	blessed rustproof +2 gray dragon sc...	blessed rustproof +2 gray dragon scal...	blessed rustproof +2 gray dragon scale mail
+9586	Mimebo TP #1	tiny plastic mime functionary	tiny plastic mime functionary
+9587	Mimebo TP #2	tiny plastic mime scientist	tiny plastic mime scientist
+9590		tiny plastic The Silent Nightmare	tiny plastic The Silent Nightmare
+9629	cheer wine	stale cheer wine	stale cheer wine
+9630	Cheer-E-Os	stale Cheer-E-Os	stale Cheer-E-Os
+9647		mime eraser	mime eraser
+9706	lucky pill	lucky-ish pill	lucky-ish pill
+9713	How To Get Bigger Without Really Tr...	How To Get Bigger Without Really Trying	How To Get Bigger Without Really Trying
+9714	Illustrated Mating Rituals of the G...	Illustrated Mating Rituals of the Gal...	Illustrated Mating Rituals of the Gallapagos
+9715	Convincing People You Can See The F...	Convincing People You Can See The Future	Convincing People You Can See The Future
+9716	Love Potions and the Wizards who Mi...	Love Potions and the Wizards who Mix ...	Love Potions and the Wizards who Mix Them
+9759	Pok&eacute;fam Guide to Capturing A...	Pok&eacute;fam Guide to Capturing All of Them	Pok&eacute;fam Guide to Capturing All of Them
+9811	Cornedbeefadon	Cornbeefadon	Cornbeefadon
+9938	Bastille Battalion control rig loan...	Bastille Battalion control rig loaner...	Bastille Battalion control rig loaner voucher
+9948	Middle of the Road&trade; brand whi...	Middle of the Road&trade; brand whiskey	Middle of the Road&trade; brand whiskey
+9973	beer bomb	party beer bomb	party beer bomb
+10024		traditional Crimbo cookie	traditional Crimbo cookie
+10244		one piece of bubble gum	one piece of bubble gum
+10332	Unopened Eight Days a Week Pill Kee...	Unopened Eight Days a Week Pill Keeper	Unopened Eight Days a Week Pill Keeper
+10343	tiny plastic dolphin &quot;orphan&q...	tiny plastic dolphin &quot;orphan&quot;	tiny plastic dolphin &quot;orphan&quot;
+10390	super-sweet fish goo	super-sweet fish goo (spoiled)	super-sweet fish goo (spoiled)
+10602	inert grey goo ring	ert grey goo ring	ert grey goo ring
+10646	packaged knock-off retro superhero ...	packaged knock-off retro superhero cape	packaged knock-off retro superhero cape
+10703	The Night Before Crimbo	The Night Before Crimbo, Ch. 1	The Night Before Crimbo, Ch. 1
+10705	The Night Before Crimbo	The Night Before Crimbo, Ch. 2	The Night Before Crimbo, Ch. 2
+10707	The Night Before Crimbo	The Night Before Crimbo, Ch. 3	The Night Before Crimbo, Ch. 3
+10709	The Night Before Crimbo	The Night Before Crimbo, Ch. 4	The Night Before Crimbo, Ch. 4
+10711	The Night Before Crimbo	The Night Before Crimbo, Ch. 5	The Night Before Crimbo, Ch. 5
+10713	The Night Before Crimbo	The Night Before Crimbo, Ch. 6	The Night Before Crimbo, Ch. 6
+10715	stuffed red and green pepper	stuffed red and green pepper (stale)	stuffed red and green pepper (stale)
+10716	cranberry margarita	cranberry margarita (brackish)	cranberry margarita (brackish)
+10798	The Nose Knows	The Nose Knows, A Guide to Smells	The Nose Knows, A Guide to Smells
+10799	The Nose Knows	The Nose Knows, A Guide to Smells (read)	The Nose Knows, A Guide to Smells (read)
+10966	 mummified entombed cookbookbat	mummified entombed cookbookbat	mummified entombed cookbookbat
+10979	Recipe of Before Yore: ratatouille ...	Recipe of Before Yore: ratatouille de...	Recipe of Before Yore: ratatouille de Jarlsberg
+10980	Recipe of Before Yore: Jarlsberg's ...	Recipe of Before Yore: Jarlsberg's ve...	Recipe of Before Yore: Jarlsberg's vegetable soup
+10981	Recipe of Before Yore: roasted vege...	Recipe of Before Yore: roasted vegeta...	Recipe of Before Yore: roasted vegetable of J.
+10982	Recipe of Before Yore: St. Pete's s...	Recipe of Before Yore: St. Pete's sne...	Recipe of Before Yore: St. Pete's sneaky smoothie
+10983	Recipe of Before Yore: Pete's wily ...	Recipe of Before Yore: Pete's wily wh...	Recipe of Before Yore: Pete's wily whey bar
+10984	Recipe of Before Yore: Pete's rich ...	Recipe of Before Yore: Pete's rich ri...	Recipe of Before Yore: Pete's rich ricotta
+10986	Recipe of Before Yore: honey bun of...	Recipe of Before Yore: honey bun of B...	Recipe of Before Yore: honey bun of Boris
+10993	Recipe of Before Yore: Calzone of L...	Recipe of Before Yore: Calzone of Legend	Recipe of Before Yore: Calzone of Legend
+10994	Recipe of Before Yore: Pizza of Leg...	Recipe of Before Yore: Pizza of Legend	Recipe of Before Yore: Pizza of Legend
+10995	Recipe of Before Yore: roasted vege...	Recipe of Before Yore: roasted vegeta...	Recipe of Before Yore: roasted vegetable focaccia
+10997	Recipe of Before Yore: baked veggie...	Recipe of Before Yore: baked veggie r...	Recipe of Before Yore: baked veggie ricotta
+10999	Recipe of Before Yore: Deep Dish of...	Recipe of Before Yore: Deep Dish of L...	Recipe of Before Yore: Deep Dish of Legend
+11016	Strong	Strong, Silent Type	Strong, Silent Type
+11035		chiffon lemon	chiffon lemon
+11061		Trainbot autoassembly module	Trainbot autoassembly module
+11110		chocolate covered ping-pong ball	chocolate covered ping-pong ball
+11125	fire ant pheromones 	fire ant pheromones	fire ant pheromones
+11266	Flash Liquidizer Ultra Dousing Acce...	Flash Liquidizer Ultra Dousing Accessory	Flash Liquidizer Ultra Dousing Accessory
+11276	scroll of protection from lycanthro...	scroll of protection from lycanthropes	scroll of protection from lycanthropes
+11277	Loathing Idol Microphone (75% charg...	Loathing Idol Microphone (75% charged)	Loathing Idol Microphone (75% charged)
+11278	Loathing Idol Microphone (50% charg...	Loathing Idol Microphone (50% charged)	Loathing Idol Microphone (50% charged)
+11279	Loathing Idol Microphone (25% charg...	Loathing Idol Microphone (25% charged)	Loathing Idol Microphone (25% charged)
