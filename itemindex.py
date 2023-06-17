@@ -256,7 +256,7 @@ function loadItemlist(filter) {
 }
 function showGraph(itemid) {
 	if (itemid > 0) 
-		top.main.location.href = "https://api.aventuristo.net/itemgraph?timespan=1&noanim=1&itemid=" + itemid;
+		top.main.location.href = "REPLACEME?timespan=1&noanim=1&itemid=" + itemid;
 }
 
 """
@@ -324,7 +324,7 @@ def transform(b, thisPage):
 	#options = re.sub("&timespan.*?>", ">", options)
 	post_select = pieces.group(6)
 	# Insert my code
-	b = (pre_script + MY_JAVASCRIPT + pre_body 
+	b = (pre_script + MY_JAVASCRIPT.replace('REPLACEME', thatPage) + pre_body 
 		+ "<body onload='loadItemlist(\"\");'>" + pre_fields 
 		+ MY_FIELDS
 		+ pre_select 
@@ -381,7 +381,11 @@ def lambda_handler(event, context):
 			logger.info('### WEB PAGE RETRIEVED')
 			state = "converting the Marketplace page"
 			rcon = event['requestContext']
-			thisPage = "https://" + rcon['domainName'] + rcon['path']
+			dom = rcon['domainName']
+			if dom == 'localhost':
+				thisPage = "http://" + dom + rcon['path']
+			else:
+				thisPage = "https://" + dom + rcon['path']
 			b = transform(b, thisPage)
 			logger.info('## WEB PAGE CONVERTED')
 		except MyTimeout as e:
@@ -418,8 +422,8 @@ if not on_aws():
 	for q in qs:
 		my_event['queryStringParameters'][q] = qs[q][0]
 	my_event['requestContext'] = { }
-	my_event['requestContext']['domainName'] = 'fedora2'
-	my_event['requestContext']['path'] = '/right.here/'
+	my_event['requestContext']['domainName'] = 'localhost'
+	my_event['requestContext']['path'] = '/cgi-bin/itemindex.py'
 	response = lambda_handler(my_event, FakeContext())
 	print(f'Content-Type: {response["headers"]["Content-Type"]}')
 	print()
