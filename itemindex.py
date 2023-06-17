@@ -1,3 +1,7 @@
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+#
+
 import os
 import re
 import html
@@ -211,6 +215,10 @@ def timeout_handler(_signal, _frame):
 	logger.info("## TIMEOUT")
 	raise MyTimeout("Time exceeded")
 
+def on_aws():
+	"""Return whether running as AWS Lambda"""
+	return "LAMBDA_TASK_ROOT" in os.environ
+
 MY_JAVASCRIPT = """
 
 function opt(txt, val) {
@@ -259,75 +267,19 @@ MY_FIELDS = """
 <br/>
 """
 
-CORRECTED_OPTIONS = {
-	'3239': 'Maxing, Relaxing',
-	'5125': 'Notes from the Elfpocalypse, Chapter I', 
-	'5126': 'Notes from the Elfpocalypse, Chapter II',
-	'5127': 'Notes from the Elfpocalypse, Chapter III',
-	'5128': 'Notes from the Elfpocalypse, Chapter IV',
-	'5129': 'Notes from the Elfpocalypse, Chapter V',
-	'5130': 'Notes from the Elfpocalypse, Chapter VI',
-	'5586': 'Aye Aye, Captain',
-	'5587': 'Aye Aye, Tooth Tooth',
-	'5590': 'Oh, the Humanitini',
-	'5602': 'Earth, Wind and Firewater',
-	'7090': 'En Una Fila Tequila',
-	'7570': 'Friendliness Beverage',
-	'7571': 'silent pea shooter',
-	'7573': 'kiwi beak',
-	'7575': 'droll monocle',
-	'7576': 'future drug: Muscularactum',
-	'7578': 'future drug: Coolscaline',
-	'7672': 'law-abiding citizen cane',
-	'7673': 'legitimate business on the beach',
-	'7674': 'hep waders',
-	'7678': '4-dimensional fez',
-	'7679': 'throwing candy',
-	'7681': 'unquiet spirits',
-	'7683': 'blue grass',
-	'7713': 'Strix stix',
-	'7714': 'vampire pellet',
-	'7715': 'non-aged vinegar',
-	'7716': 'unsanitized scalpel',
-	'7717': 'gladiator tunica',
-	'7721': 'salt wages',
-	'7943': 'nastygeist',
-	'7944': 'gold tooth',
-	'7945': 'portable table',
-	'7946': 'outlaw bandana',
-	'7947': 'whiskey in a broken glass',
-	'7948': 'shot of mescal',
-	'7950': "minin' dynamite",
-	'7951': 'plaid cowboy hat',
-	'7952': 'spooky lasso',
-	'7954': 'rattker rattle',
-	'7953': "rusted-out shootin' iron",
-	'7949': 'glass of herbal tequila',
-	'7941': 'sleeve deuce',
-	'7942': 'pocket ace',
-	'8012': 'Crimbomega drive chain',
-	'8254': 'Trash, a Memoir',
-	'8424': '1,970 carat gold',
-	'8557': "The Emperor's new cookie",
-	'8560': 'Aerheads',
-	'8561': 'Wrotz',
-	'8790': 'elven tambourine',
-	'8791': 'reindeer sickle',
-	'8838': 'exploding gum',
-	'9122': 'Tea, Earl Grey, Hot',
-	'9476': 'Spant eggs',
-	'9590': 'tiny plastic The Silent Nightmare',
-	'9647': 'mime eraser',
-	'10024': 'traditional Crimbo cookie',
-	'10207': '[glitch season reward name]',
-	'10244': 'one piece of bubble gum',
-	'10798': 'The Nose Knows, A Guide to Smells',
-	'10799': 'The Nose Knows, A Guide to Smells (read)',
-	'11016': 'Strong, Silent Type',
-	'11035': 'chiffon lemon',
-	'11061': 'Trainbot autoassembly module',
-	'11110': 'chocolate covered ping-pong ball'
-}
+def corrected_options():
+	result = { }
+	fn = 'bonanomoj.txt'
+	if on_aws():
+		fn = os.environ['LAMBDA_TASK_ROOT']+'/'+fn
+	else:
+		fn = '/home/markmeyer/git/kol-marketplace/'+fn
+	with open(fn, 'r', encoding='utf-8') as bn:
+		ls = bn.readlines()
+		for ln in ls:
+			l = ln.split('\t')
+			result[int(l[0])] = l[2]
+	return result
 
 def repaired_options(options_html):
 	# extract item ids and HTML-encoded names
@@ -337,11 +289,13 @@ def repaired_options(options_html):
 		opts.remove(opts[0])
 	# look for erroneous elements and replace them with good ones
 	replacements = [ ]
+	korektoj = corrected_options()
 	for o in opts:
-		if o[0] in CORRECTED_OPTIONS:
-			replacements.append((o[0], CORRECTED_OPTIONS[o[0]]))
-	opts[:] = [o for o in opts if o[0] not in CORRECTED_OPTIONS]
-	opts = opts + replacements
+		i = int(o[0])
+		if i in korektoj:
+			replacements.append((o[0], korektoj[i]))
+	opts[:] = [o for o in opts if int(o[0]) not in korektoj]	# only good ones
+	opts = opts + replacements	# add replacements
 	# sort by html-unencoded names, case-insensitive
 	opts.sort(key=lambda o: html.unescape(o[1]).lower())
 	# rebuild list of options
@@ -398,6 +352,7 @@ def lambda_handler(event, context):
 	logger.info('## BEGIN')	
 	operation = event['httpMethod']
 	if operation == 'GET':
+		b = ""
 		try:
 			global state
 			signal.signal(signal.SIGALRM, timeout_handler)
@@ -417,8 +372,8 @@ def lambda_handler(event, context):
 				url = url + delim + p + "=" + params[p]
 				delim = "&"
 			logger.info('## WEB PAGE OPENING')
-			noverify = ssl.SSLContext()
-			f = request.urlopen(url, context=noverify) # Remove context=... when cert good
+			#noverify = ssl.SSLContext()
+			f = request.urlopen(url) # Remove context=... when cert good
 			state = "reading the Marketplace page"
 			logger.info('## WEB PAGE READING')
 			b = f.read()
@@ -431,9 +386,9 @@ def lambda_handler(event, context):
 			logger.info('## WEB PAGE CONVERTED')
 		except MyTimeout as e:
 			logger.info("## HANDLE TIMEOUT")
-			b = timeoutResponse.format(state)
+			b = 'TImeout!<br/>' + timeoutResponse.format(state)
 		except Exception as e:
-			b = exceptionInfo(traceback.format_exc(), event)
+			b = 'Exception!<br/>' + traceback.format_exc().replace('\n', '<br/>')
 		finally:
 			signal.alarm(0)
 			return respond(None, b)
@@ -441,14 +396,36 @@ def lambda_handler(event, context):
 		return respond(ValueError('Unsupported method "{}"'.format(operation)))
 
 ###############################################################
-# Test on my laptop - read the original and convert it
-def on_aws():
-	"""Return whether running as AWS Lambda"""
-	return "LAMBDA_TASK_ROOT" in os.environ
+# If CGI on my laptop, create event and context to pass to lambda_handler
+class FakeContext:
+	def get_remaining_time_in_millis(self):
+		return 300000
 
 if not on_aws():
-	with open(f'{os.environ["HOME"]}/marketplace2.0.html', "r") as orig:
-		b = orig.read()
-		b = transform(b, 'https://api.aventuristo.net/itemindex')
-		with open(f'{os.environ["HOME"]}/marketplace2.2.html', "w") as xform:
-			xform.write(b)
+	import sys
+	import urllib.parse
+	my_event = { }
+	my_event['httpMethod'] = 'GET'
+	my_event['queryStringParameters'] = { }
+	# web cgi
+	method = 'GET'
+	if 'REQUEST_METHOD' in os.environ:
+		method = os.environ['REQUEST_METHOD']
+	if method == 'GET':
+		qs = [ ]
+		if 'QUERY_STRING' in os.environ:
+			qs = urllib.parse.parse_qs(os.environ['QUERY_STRING'])
+	for q in qs:
+		my_event['queryStringParameters'][q] = qs[q][0]
+	my_event['requestContext'] = { }
+	my_event['requestContext']['domainName'] = 'fedora2'
+	my_event['requestContext']['path'] = '/right.here/'
+	response = lambda_handler(my_event, FakeContext())
+	print(f'Content-Type: {response["headers"]["Content-Type"]}')
+	print()
+	print(response['body'])
+	#with open(f'{os.environ["HOME"]}/marketplace2.0.html', "r") as orig:
+	#	b = orig.read()
+	#	b = transform(b, 'https://api.aventuristo.net/itemindex')
+	#	with open(f'{os.environ["HOME"]}/marketplace2.2.html', "w") as xform:
+	#		xform.write(b)
