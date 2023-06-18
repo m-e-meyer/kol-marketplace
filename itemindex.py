@@ -227,12 +227,17 @@ function opt(txt, val) {
 	o.innerText = txt;
 	return o;
 }
+
 function loadItemlist(filter) {
-	var f = filter.toLowerCase();
 	var il = document.getElementById("itemlist");
+	while (il.options.length) { il.remove(0); }
+	if (filter == '') {
+		il.appendChild(opt("Please enter filter above and apply", 0));	
+		return;
+	}
+	var f = filter.toLowerCase();
 	// hiddenlist has all the items
 	var opts = document.getElementById("hiddenlist").options;
-	while (il.options.length) { il.remove(0); }
 	var opt0 = opt("Select " + f + " item", 0);
 	il.appendChild(opt0);
 	var found = false;
@@ -254,6 +259,11 @@ function loadItemlist(filter) {
 		opt0.innerText = "No " + f + " item found";
 	il.value = 0;
 }
+
+function applyFilter() {
+	loadItemlist(document.getElementById("filter").value);
+}
+
 function showGraph(itemid) {
 	if (itemid > 0) 
 		top.main.location.href = "REPLACEME?timespan=1&noanim=1&itemid=" + itemid;
@@ -263,7 +273,7 @@ function showGraph(itemid) {
 
 MY_FIELDS = """
 <br/>Filter: <input type='text' name='filter' id='filter'>
-<button onclick='loadItemlist(document.getElementById("filter").value);'>apply</button>
+<button onclick='applyFilter();'>apply</button>
 <br/>
 """
 
@@ -325,12 +335,13 @@ def transform(b, thisPage):
 	post_select = pieces.group(6)
 	# Insert my code
 	b = (pre_script + MY_JAVASCRIPT.replace('REPLACEME', thatPage) + pre_body 
-		+ "<body onload='loadItemlist(\"\");'>" + pre_fields 
+		+ "<body onload='applyFilter();'>" + pre_fields 
 		+ MY_FIELDS
 		+ pre_select 
 		+ f'<select name="itemlist" id="itemlist" onchange="showGraph(this.options[this.selectedIndex].value);">'
 		+ "<option value='0'>Loading...</option>"
-		+ "</select><select name='hiddenlist' id='hiddenlist' hidden>" + options + "</select>" + post_select)
+		+ "</select><select name='hiddenlist' id='hiddenlist' hidden>" + options + "</select>" 
+		+ post_select.replace('width=900', 'width=800'))
 	# Put my little stamp on it
 	b = b.replace('<b>KoL Marketplace v2.0',
 				  '<b>KoL Marketplace v2.<span style="color: green">2</span>')
