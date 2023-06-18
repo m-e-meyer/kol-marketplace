@@ -341,7 +341,7 @@ def transform(b, thisPage):
 		+ f'<select name="itemlist" id="itemlist" onchange="showGraph(this.options[this.selectedIndex].value);">'
 		+ "<option value='0'>Loading...</option>"
 		+ "</select><select name='hiddenlist' id='hiddenlist' hidden>" + options + "</select>" 
-		+ post_select.replace('width=900', 'width=800'))
+		+ post_select.replace('width=900', 'width=750'))
 	# Put my little stamp on it
 	b = b.replace('<b>KoL Marketplace v2.0',
 				  '<b>KoL Marketplace v2.<span style="color: green">2</span>')
