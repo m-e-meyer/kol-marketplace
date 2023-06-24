@@ -1761,7 +1761,8 @@ def prepareResponse(event, context):
 	b = re.sub('<link [^>]*marketstyle.css[^>]*>', STYLE, b)
 	# Replace original links to source with ours
 	rcon = event['requestContext']
-	thisPage = "https://" + rcon['domainName'] + rcon['path']
+	domain = rcon['domainName']
+	thisPage = "https://" + domain + rcon['path']
 	b = b.replace(SOURCE, thisPage)
 	b = b.replace('greenup.gif', SOURCE_IMG+'greenup.gif')
 	b = b.replace('reddown.gif', SOURCE_IMG+'reddown.gif')
@@ -1769,7 +1770,9 @@ def prepareResponse(event, context):
 	b = b.replace('rightarrow.gif', SOURCE_IMG+'rightarrow.gif')
 	b = b.replace('nochange.gif', SOURCE_IMG+'nochange.gif')
 	b = b.replace('translist.php', SOURCE_IMG+'translist.php')
-	b = b.replace('/newmarket/itemgraph.php', rcon['path'])
+	b = b.replace(WIKILOC+'/newmarket/itemgraph.php', domain+rcon['path'])
+	if domain != 'localhost':
+		b = b.replace('http://'+domain, 'https://'+domain)
 	# Tried to replace out-of-line Javascript with inline - no luck
 	b = b.replace(OLD_DATESTYLE, DATESTYLE)
 	b = b.replace(OLD_MOOTOOLS, MOOTOOLS)
@@ -1941,8 +1944,8 @@ if not on_aws():
 		for q in qs:
 			my_event['queryStringParameters'][q] = qs[q][0]
 	my_event['requestContext'] = { }
-	my_event['requestContext']['domainName'] = 'fedora2'
-	my_event['requestContext']['path'] = '/right.here/'
+	my_event['requestContext']['domainName'] = 'localhost'
+	my_event['requestContext']['path'] = '/cgi-bin/itemgraph.py'
 	response = lambda_handler(my_event, FakeContext())
 	print(f'Content-Type: {response["headers"]["Content-Type"]}')
 	print()
