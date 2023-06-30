@@ -1771,6 +1771,7 @@ def prepareResponse(event, context):
 	b = b.replace('nochange.gif', SOURCE_IMG+'nochange.gif')
 	b = b.replace('translist.php', SOURCE_IMG+'translist.php')
 	b = b.replace(WIKILOC+'/newmarket/itemgraph.php', domain+rcon['path'])
+	b = b.replace('/newmarket/itemgraph.php', rcon['path'])
 	if domain != 'localhost':
 		b = b.replace('http://'+domain, 'https://'+domain)
 	# Tried to replace out-of-line Javascript with inline - no luck
