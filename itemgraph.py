@@ -166,7 +166,7 @@ div#tcal td {
 	cursor: pointer;
 }
 /* date highlight
-   in case of conflicting settings order here determines the priority from least to most important */
+in case of conflicting settings order here determines the priority from least to most important */
 div#tcal td.othermonth {
 	color: silver;
 }
@@ -639,12 +639,12 @@ var DatePicker = new Class({
 	
 	// element references:
 	attachTo: null,	// selector for target inputs
-	picker: null,	  // main datepicker container
-	slider: null,	  // slider that contains both oldContents and newContents, used to animate between 2 different views
+	picker: null,	// main datepicker container
+	slider: null,	// slider that contains both oldContents and newContents, used to animate between 2 different views
 	oldContents: null, // used in animating from-view to new-view
 	newContents: null, // used in animating from-view to new-view
-	input: null,	   // original input element (used for input/output)
-	visual: null,	  // visible input (used for rendering)
+	input: null,	 // original input element (used for input/output)
+	visual: null,	// visible input (used for rendering)
 	
 	options: { 
 		pickerClass: 'datepicker',
@@ -670,9 +670,9 @@ var DatePicker = new Class({
 		toggleElements: null,
 		
 		// and some event hooks:
-		onShow: $empty,   // triggered when the datepicker pops up
-		onClose: $empty,  // triggered after the datepicker is closed (destroyed)
-		onSelect: $empty  // triggered when a date is selected
+		onShow: $empty, 	// triggered when the datepicker pops up
+		onClose: $empty,	// triggered after the datepicker is closed (destroyed)
+		onSelect: $empty	// triggered when a date is selected
 	},
 
 
@@ -1253,7 +1253,7 @@ var DatePicker = new Class({
 				case 'i': f += this.leadZero(t.getMinutes()); break;
 				case 's': f += this.leadZero(t.getSeconds()); break;
 				case 'U': f += Math.floor(t.valueOf() / 1000); break;
-				default:  f += format.charAt(i);
+				default: f += format.charAt(i);
 			}
 		}
 		return f;
@@ -1288,7 +1288,7 @@ var DatePicker = new Class({
 				case 'i': 
 				case 's': r = '[012345][0-9]'; break;
 				case 'U': r = '-?[0-9]+$'; break;
-				default:  r = null;
+				default: r = null;
 			}
 			
 			if ($chk(r)) {
@@ -1475,7 +1475,7 @@ def generateChart2(startDate, endDate, tbl, maxvol, maxprice, minprice, startpri
 	result = result + "  .dates { font: bold 8px sans-serif; fill: green; }\n"
 	result = result + "</style>\n"
 	result = result + rect(SIDE_MARGIN, TOP_MARGIN, GRAPH_WIDTH, GRAPH_HEIGHT,
-						   'fill: white; stroke-width: 1px; stroke: black;', '')
+						'fill: white; stroke-width: 1px; stroke: black;', '')
 	for i in range(4):
 		result = result + horizontalLine(SIDE_MARGIN, SIDE_MARGIN+GRAPH_WIDTH,
 										 GRAPH_BOTTOM-(GRAPH_HEIGHT*(i+1)/5),
@@ -1484,9 +1484,9 @@ def generateChart2(startDate, endDate, tbl, maxvol, maxprice, minprice, startpri
 	cat1x = SIDE_MARGIN + catwidth/2.0
 	for i in range(len(tbl)):
 		result = result + category(cat1x + i*catwidth - catwidth/4, GRAPH_HEIGHT, 
-								   (tbl[i][0]+TIMESHIFT).strftime("%Y %b %-d, %-H:%MZ"))
+								(tbl[i][0]+TIMESHIFT).strftime("%Y %b %-d, %-H:%MZ"))
 	result = result + category(cat1x + 24*catwidth - catwidth/4, GRAPH_HEIGHT, 
-								   (endDate+TIMESHIFT).strftime("%Y %b %-d, %-H:%MZ"))
+								(endDate+TIMESHIFT).strftime("%Y %b %-d, %-H:%MZ"))
 	result = result + volumeAxis(maxvol);
 	if startprice < minprice: minprice = startprice
 	if startprice > maxprice: maxprice = startprice
@@ -1567,7 +1567,7 @@ def priceGoingIn(itemid, startDate):
 def econXactionsToGraphTable(data, startDate, endDate):
 	result = [ ]
 	dt = startDate
-	incr = (endDate - startDate) / 24   # graph will have 24 columns
+	incr = (endDate - startDate) / 24 # graph will have 24 columns
 	while dt < endDate:
 		result.append( [dt, 0, 0] )
 		dt = dt + incr
@@ -1690,7 +1690,7 @@ def prepareResponse(event, context):
 	if 'timespan' not in params or params['timespan'] == '':
 		span = '0'	# use specified starttime and endtime
 	else:
-		span = params['timespan']   # use period of time ending now
+		span = params['timespan'] # use period of time ending now
 	# Compute endDate (rounded to previous half-hour)
 	# Use specified time if provided and not overridden by a timespan
 	# Else use Now
@@ -1783,63 +1783,71 @@ def prepareResponse(event, context):
 	# Below is because the Reload Chart button gives us a page that does not have
 	# the <graph> elements where we get our data.  Let's force a full reload.
 	b = b.replace('name=happy', 'name=unhappy')
-	# Fetch <graph> tag and extract data
-	graphre = re.compile('<graph ([^>]*)>(.*)</graph>')
-	graphxml = graphre.search(b)
-	graphattrs = graphxml.group(1)
-	#vmax = float(re.search("PYAxisMaxValue='([^']*)", graphattrs).group(1))
-	#vmax = normalizeVmax(vmax)
-	#pmax = float(re.search("SYAxisMaxValue='([^']*)", graphattrs).group(1))
-	#pmin = float(re.search("SYAxisMinValue='([^']*)", graphattrs).group(1))
-	graphdata = graphxml.group(2)
-	#cmatches = re.findall("category name='([^']*)", graphdata)
-	#for m in cmatches:
-	#	print(m)
-	# Get what data we can from KoL Marketplace's graph
-	tbl, volume, lastprice, startprice = graphDataToGraphTable(graphdata, startDate, endDate)
-	# Take additional steps if timespan includes when Marketplace failed
-	# 6/24/2020: ECON DATA SUPPLY CUT OFF, use 2.0 data
-	if False and endDate > KOL_MARKETPLACE_OUTAGE:
-		itemid = params['itemid']
-		if startDate < KOL_MARKETPLACE_OUTAGE:
-			xactions = fetchXactions(itemid, KOL_MARKETPLACE_OUTAGE, endDate)
-		else:
-			xactions = fetchXactions(itemid, startDate, endDate)
-		tbl, volume, lastprice = fillInMissingData(tbl, xactions)
-		#if startDate >= KOL_MARKETPLACE_OUTAGE:
-		#	econstartprice = priceGoingIn(itemid, startDate)
-		#	if econstartprice > 99:
-		#		startprice = econstartprice
-		b = re.sub('CURRENT AVG PRICE: <font color=dodgerblue>[0-9.,]* meat',
-				   f'CURRENT AVG PRICE: <font color=dodgerblue>{lastprice:,} meat',
-				   b)
-		b = re.sub('BOUGHT THIS TIMESPAN: <font color=dodgerblue>[0-9,]*',
-				   f'BOUGHT THIS TIMESPAN: <font color=dodgerblue>{volume:,}',
-				   b)
-		changehtml = generateTrend(lastPriceChange(xactions))
-		b = re.sub('Latest Price Change: <img [^>]*> <font color=[^>]*>[-,0-9.]*</font>',
-				   f'Latest Price Change: {changehtml}', b)
-		trendhtml = generateTrend(lastprice - startprice)
-		b = re.sub('Timespan Price Trend: <img [^>]*> <font color=[^>]*>[-,0-9.]*</font>',
-				   f'Timespan Price Trend: {trendhtml}', b)
-		b = re.sub('<DIV id=layer1 .*</DIV>', transactionLayer(xactions), b, flags=re.DOTALL)
-	# Determine axes and generate chart
-	pmax = startprice
-	pmin = startprice
-	vmax = 0
-	for i in range(len(tbl)):
-		p = tbl[i][2]
-		if p >= 100:
-			if pmax < p: pmax = p
-			if p < pmin: pmin = p
-		v = tbl[i][1]
-		if vmax < v : vmax = v
-	vmax = normalizeVmax(vmax)
-	b = b.replace('Chart.', generateChart2(startDate, endDate, tbl,
-										   vmax, pmax, pmin, startprice))
-	b = b.replace('Full Transaction List</a> ]',
-				  'Full Transaction List</a> ]<br/><br/>'
-				  + 'Page adapted for HTML5 by Aventuristo (#3028125)')
+	# Replace graph only if there is one
+	if b.find('recalibrate our flux cap') >= 0:
+		# If there isn't one, change cutesy error message
+		b = b.replace("We'll recalibrate our flux capacitor while you adjust your parameters.",
+			'<center><br/>Sorry, the data available only go back 2 years.'
+			+ '<br/><br/>Page adapted for HTML5 by Aventuristo (#3028125)'
+			+ '</center>')
+	else:
+		# Fetch <graph> tag and extract data
+		graphre = re.compile('<graph ([^>]*)>(.*)</graph>')
+		graphxml = graphre.search(b)
+		graphattrs = graphxml.group(1)
+		#vmax = float(re.search("PYAxisMaxValue='([^']*)", graphattrs).group(1))
+		#vmax = normalizeVmax(vmax)
+		#pmax = float(re.search("SYAxisMaxValue='([^']*)", graphattrs).group(1))
+		#pmin = float(re.search("SYAxisMinValue='([^']*)", graphattrs).group(1))
+		graphdata = graphxml.group(2)
+		#cmatches = re.findall("category name='([^']*)", graphdata)
+		#for m in cmatches:
+		#	print(m)
+		# Get what data we can from KoL Marketplace's graph
+		tbl, volume, lastprice, startprice = graphDataToGraphTable(graphdata, startDate, endDate)
+		# Take additional steps if timespan includes when Marketplace failed
+		# 6/24/2020: ECON DATA SUPPLY CUT OFF, use 2.0 data
+		if False and endDate > KOL_MARKETPLACE_OUTAGE:
+			itemid = params['itemid']
+			if startDate < KOL_MARKETPLACE_OUTAGE:
+				xactions = fetchXactions(itemid, KOL_MARKETPLACE_OUTAGE, endDate)
+			else:
+				xactions = fetchXactions(itemid, startDate, endDate)
+			tbl, volume, lastprice = fillInMissingData(tbl, xactions)
+			#if startDate >= KOL_MARKETPLACE_OUTAGE:
+			#	econstartprice = priceGoingIn(itemid, startDate)
+			#	if econstartprice > 99:
+			#		startprice = econstartprice
+			b = re.sub('CURRENT AVG PRICE: <font color=dodgerblue>[0-9.,]* meat',
+					f'CURRENT AVG PRICE: <font color=dodgerblue>{lastprice:,} meat',
+					b)
+			b = re.sub('BOUGHT THIS TIMESPAN: <font color=dodgerblue>[0-9,]*',
+					f'BOUGHT THIS TIMESPAN: <font color=dodgerblue>{volume:,}',
+					b)
+			changehtml = generateTrend(lastPriceChange(xactions))
+			b = re.sub('Latest Price Change: <img [^>]*> <font color=[^>]*>[-,0-9.]*</font>',
+					f'Latest Price Change: {changehtml}', b)
+			trendhtml = generateTrend(lastprice - startprice)
+			b = re.sub('Timespan Price Trend: <img [^>]*> <font color=[^>]*>[-,0-9.]*</font>',
+					f'Timespan Price Trend: {trendhtml}', b)
+			b = re.sub('<DIV id=layer1 .*</DIV>', transactionLayer(xactions), b, flags=re.DOTALL)
+		# Determine axes and generate chart
+		pmax = startprice
+		pmin = startprice
+		vmax = 0
+		for i in range(len(tbl)):
+			p = tbl[i][2]
+			if p >= 100:
+				if pmax < p: pmax = p
+				if p < pmin: pmin = p
+			v = tbl[i][1]
+			if vmax < v : vmax = v
+		vmax = normalizeVmax(vmax)
+		b = b.replace('Chart.', generateChart2(startDate, endDate, tbl,
+											vmax, pmax, pmin, startprice))
+		b = b.replace('Full Transaction List</a> ]',
+					'Full Transaction List</a> ]<br/><br/>'
+					+ 'Page adapted for HTML5 by Aventuristo (#3028125)')
 	# Correct the item name, if necessary
 	korektoj = corrected_options()
 	i = int(params['itemid'])
