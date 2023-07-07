@@ -1758,6 +1758,8 @@ def prepareResponse(event, context):
 		startDate = prevts
 	# Set our display style
 	state = "transforming the Marketplace graph page"
+	# First, discourage crawlers, because of Yandex Jun 25 - Jul 5
+	b = b.replace('<HEAD>', '<HEAD><meta name="robots" content="none">')
 	b = re.sub('<link [^>]*marketstyle.css[^>]*>', STYLE, b)
 	# Replace original links to source with ours
 	rcon = event['requestContext']
@@ -1904,7 +1906,8 @@ def lambda_handler(event, context):
 
 	This visits a KoL Marketplace search page and relays its content to the caller.
 	'''
-	logger.info("## HANDLE LAMBDA")
+	#logger.info("## HANDLE LAMBDA")
+	logger.info(f"## HANDLE LAMBDA for {event['requestContext']['identity']['sourceIp']}")
 	if 'source' in event and event['source'] == 'aws.events':
 		return respond(None, 'Ping acknowledged')
 	
