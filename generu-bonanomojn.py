@@ -4,16 +4,23 @@
 # (many of which are wrong), and write them to bonanomoj.txt, where it can
 # be Git-controlled and used by the item* scripts.
 
-import urllib.request
+#import urllib.request
+import urllib3
+from urllib3.util import create_urllib3_context
 import re
 import os
 import html
 
 mstr = ""
 # can't read the original website from Mafia
-with urllib.request.urlopen('https://kol.coldfront.net/newmarket/') as fp:
-	byts = fp.read()
-	mstr = byts.decode("utf8")
+SRC = 'https://kol.coldfront.net/newmarket/'
+#with urllib.request.urlopen(SRC) as fp:
+#	byts = fp.read()
+#	mstr = byts.decode("utf8")
+ctx = create_urllib3_context(ciphers=":HIGH:!DH:!aNULL", cert_reqs=0)
+http = urllib3.PoolManager(ssl_context=ctx)
+resp = http.request('GET', SRC)
+mstr = resp.data.decode('utf-8')
 # Construct map of ids to HTML-escpaed Coldfront names
 opts = re.findall("<option.*?itemid=([0-9]*).*?>(.*?)</option>", mstr)
 if opts[0][1] == 'Select item':
