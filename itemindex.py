@@ -5,7 +5,8 @@
 import os
 import re
 import html
-from urllib import request
+import urllib3
+from urllib3.util import create_urllib3_context
 import logging
 import signal
 import ssl
@@ -383,12 +384,12 @@ def lambda_handler(event, context):
 				url = url + delim + p + "=" + params[p]
 				delim = "&"
 			logger.info('## WEB PAGE OPENING')
-			#noverify = ssl.SSLContext()
-			f = request.urlopen(url) # Remove context=... when cert good
+			ctx = create_urllib3_context(ciphers=":HIGH:!DH:!aNULL", cert_reqs=0)
+			http = urllib3.PoolManager(ssl_context=ctx)
 			state = "reading the Marketplace page"
 			logger.info('## WEB PAGE READING')
-			b = f.read()
-			b = b.decode("utf-8", "ignore")
+			resp = http.request('GET', url)
+			b = resp.data.decode('utf-8')
 			logger.info('### WEB PAGE RETRIEVED')
 			state = "converting the Marketplace page"
 			rcon = event['requestContext']
@@ -403,6 +404,7 @@ def lambda_handler(event, context):
 			logger.info("## HANDLE TIMEOUT")
 			b = 'TImeout!<br/>' + timeoutResponse.format(state)
 		except Exception as e:
+			logger.info("## HANDLE ERROR: " + str(e))
 			b = 'Exception!<br/>' + traceback.format_exc().replace('\n', '<br/>')
 		finally:
 			signal.alarm(0)
