@@ -1738,8 +1738,11 @@ def prepareResponse(event, context):
 		delim = "&"
 	#print("URL to open on Coldfront: " + url)
 	state = "reading the Marketplace graph page"
-	#noverify = ssl.SSLContext()
-	f = request.urlopen(url) # Remove context=... when cert good
+	# AWS Python 3.11 doesn't like the DH key length that Coldfront uses.
+	# Need to have the SSL connection not use DH
+	ctx = ssl.create_default_context()
+	ctx.set_ciphers('DEFAULT:!DH')
+	f = request.urlopen(url, context=ctx)
 	b = f.read()
 	b = b.decode("utf-8", "ignore")
 	#print("Coldfront page received")
